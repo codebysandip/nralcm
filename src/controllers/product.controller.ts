@@ -25,7 +25,7 @@ export class ProductController extends BaseController {
     }
 
     @Route("getProductDetails", HttpMethod.GET)
-    public getProductDetails(queryString: string) {
+    public getProductDetails(queryString: boolean, @Optional() optional: string) {
         return { data: queryString };
     }
 }
