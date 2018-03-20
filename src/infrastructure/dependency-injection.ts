@@ -8,7 +8,7 @@ export class DependencyInjection {
     }
 
     private inject() {
-        const constructorParameterTypes: any[] = Reflect.getMetadata("design:paramtypes", this.context.controller as Object);
+        const constructorParameterTypes: any[] = Reflect.getMetadata("design:paramtypes", this.context.controller);
         if (constructorParameterTypes && constructorParameterTypes.length > 0) {
             const constructorParameters = this.getConstructorParameters(this.context.controller);
             constructorParameterTypes.forEach((val: any, index) => {

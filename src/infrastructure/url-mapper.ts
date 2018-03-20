@@ -6,32 +6,34 @@ import { QueryString } from "../infrastructure/query-string";
 import { constants } from "os";
 import { HttpContext } from "./http-request";
 import { NotFoundException } from "../exceptions/not-found.exception";
+import { getMethodParameters } from "../common/get-method-parameters";
+import { isValidType } from "../common/check-valid-type";
 
-export function UrlMapper(routeDescriptors: RouteDescriptor[], url: string, context: HttpContext): RouteDescriptor | false {
+export function UrlMapper(routeDescriptors: RouteDescriptor[], url: string, context: HttpContext): RouteDescriptor | null {
     // try to find route without param
     const routeDescriptor = routeDescriptors.find(routeDescriptor => routeDescriptor.route === url);
     if (routeDescriptor) {
-        mapQueryString(context);
+        mapQueryString(context, routeDescriptor);
+        validateParamsAndQueryWithMethodParameters(context, routeDescriptor);
         return routeDescriptor;
     }
 
     const paramMapResult = mapParams(context, routeDescriptors, url);
-    if (typeof paramMapResult !== "boolean") {
-        mapQueryString(context);
+    if (paramMapResult !== null) {
+        mapQueryString(context, paramMapResult);
+        validateParamsAndQueryWithMethodParameters(context, paramMapResult);
         return paramMapResult;
-    } else if (paramMapResult) {
-        return false;
     }
     new NotFoundException(context);
-    return false;
+    // tslint:disable-next-line:no-null-keyword
+    return null;
 }
 
 function mapApiMethod(context: HttpContext) {
 
 }
 
-function mapParams(context: HttpContext, routeDescriptors: RouteDescriptor[], url: string): RouteDescriptor|false {
-    let isFound = false;
+function mapParams(context: HttpContext, routeDescriptors: RouteDescriptor[], url: string): RouteDescriptor|null {
     for (let index = 0; index < routeDescriptors.length; index++) {
         const routeParts = routeDescriptors[index].route.startsWith("/") ? routeDescriptors[index].route.substring(1).split("/") : routeDescriptors[index].route.split("/");
         const urlParts = url.startsWith("/") ? url.substring(1).split("/") : url.split("/");
@@ -48,8 +50,6 @@ function mapParams(context: HttpContext, routeDescriptors: RouteDescriptor[], ur
                     }
                 });
                 if (isMatched) {
-                    let isEmptyParams = false;
-                    isFound = true;
                     routeParts.forEach((route, i) => {
                         const openCurlyBraceIndex = route.indexOf("{");
                         const closeCurlyBraceIndex = route.indexOf("}");
@@ -67,54 +67,125 @@ function mapParams(context: HttpContext, routeDescriptors: RouteDescriptor[], ur
                                 validatorDataArr.push(validatorData);
                                 Reflect.defineMetadata(Constants.metadata.routeParams, validatorDataArr, context.controllerObject);
                             } else {
-                                // return response
-                                isEmptyParams = true;
-                                if (context.controller) {
-                                    const emptyRouteParams = Reflect.getMetadata(Constants.metadata.emptyRouteParams, context.controllerObject) as string[] || [];
-                                    emptyRouteParams.push(route.substring(openCurlyBraceIndex + 1, closeCurlyBraceIndex));
-                                    Reflect.defineMetadata(Constants.metadata.emptyRouteParams, emptyRouteParams, context.controllerObject);
-                                }
+                                const existingErrorMessages = Reflect.getMetadata(Constants.metadata.emptyRouteParams, context.controllerObject) as string[] || [];
+                                existingErrorMessages.push(`Parametr ${route.substring(openCurlyBraceIndex + 1, closeCurlyBraceIndex)} is missing`);
+                                Reflect.defineMetadata(Constants.metadata.emptyRouteParams, existingErrorMessages, context.controllerObject);
                             }
                         }
                     });
-                    if (!isEmptyParams) {
-                        return routeDescriptors[index];
-                    } else {
-                        isFound = false;
-                        const emptyRouteParams = Reflect.getMetadata(Constants.metadata.emptyRouteParams, context.controllerObject) as string[] || [];
-                        let message: string = "";
-                        emptyRouteParams.forEach(val => {
-                            message += `Parametr ${val} is missing`;
-                        });
-                        context.response.type("application/json").status(400).send({ message: message });
-                        return false;
-                    }
+                    // validateParamsWithMethodParameters(context, routeDescriptors[index]);
+                    return routeDescriptors[index];
                 }
             }
         }
     }
-    return isFound;
+    // tslint:disable-next-line:no-null-keyword
+    return null;
 }
 
-function mapQueryString(context: HttpContext) {
-    const queryStringIndex = context.request.url.indexOf("?");
-    if (queryStringIndex > 0) {
-        const splittedUrl = context.request.url.split("?");
-        if (splittedUrl.length == 2) {
-            const queryString = splittedUrl[1];
-            const queryStringArr: string[] = queryString.split("&");
-            queryStringArr.forEach(qs => {
-                const existingQueryStrings = Reflect.getMetadata(Constants.metadata.queryString, context.controllerObject) as QueryString[] || [];
+function mapQueryString(context: HttpContext, routeDescriptor: RouteDescriptor) {
+    // const queryStringIndex = context.request.url.indexOf("?");
+    // if (queryStringIndex > 0) {
+    //     const splittedUrl = context.request.url.split("?");
+    //     if (splittedUrl.length == 2) {
+    //         const queryString = splittedUrl[1];
+    //         const queryStringArr: string[] = queryString.split("&");
+    //         queryStringArr.forEach(qs => {
+    //             const existingQueryStrings = Reflect.getMetadata(Constants.metadata.queryString, context.controllerObject,
+    //                                             routeDescriptor.propertyKey) as QueryString[] || [];
+    //             existingQueryStrings.push({
+    //                 name: qs.split("=")[0],
+    //                 value: qs.split("=")[1]
+    //             });
+    //             Reflect.defineMetadata(Constants.metadata.queryString, existingQueryStrings, context.controllerObject,
+    //                         routeDescriptor.propertyKey);
+    //         });
+    //     }
+    // }
+
+    if (context.request.query) {
+            const existingQueryStrings = Reflect.getMetadata(Constants.metadata.queryString, context.controllerObject,
+                                            routeDescriptor.propertyKey) as QueryString[] || [];
+            Object.keys(context.request.query).forEach(qs => {
                 existingQueryStrings.push({
-                    name: qs.split("=")[0],
-                    value: qs.split("=")[1]
+                    name: qs,
+                    value: context.request.query[qs]
                 });
-                Reflect.defineMetadata(Constants.metadata.queryString, existingQueryStrings, context.controllerObject);
             });
-        }
+
+            Reflect.defineMetadata(Constants.metadata.queryString, existingQueryStrings, context.controllerObject,
+                routeDescriptor.propertyKey);
     }
 }
 
 function mapBodyWithParameter(context: HttpContext) {
 
 }
+
+function validateParamsAndQueryWithMethodParameters(context: HttpContext, routeDescriptor: RouteDescriptor) {
+    const methodParameterTypes = Reflect.getMetadata("design:paramtypes", context.controllerObject, routeDescriptor.propertyKey);
+    const methodParameters = getMethodParameters(context.controller, routeDescriptor.propertyKey);
+    const validationMetaData = Reflect.getMetadata(Constants.metadata.validation, context.controllerObject,
+                                routeDescriptor.propertyKey) as ValidatorData[];
+    const paramMetaData = Reflect.getMetadata(Constants.metadata.routeParams, context.controllerObject,
+                            routeDescriptor.propertyKey) as ValidatorData[];
+    const queryStringMetaData = Reflect.getMetadata(Constants.metadata.queryString, context.controllerObject,
+                                    routeDescriptor.propertyKey) as QueryString[];
+    let optionalParameters: ValidatorData[] = [];
+    if (validationMetaData && validationMetaData.length) {
+        optionalParameters = validationMetaData.filter(m => m.validator === "Optional");
+    }
+
+    const existingErrorMessages = Reflect.getMetadata(Constants.metadata.errorMessages, context.controllerObject) as string[] || [];
+
+    methodParameters.forEach((par, index) => {
+        let isFound = false;
+        const param = paramMetaData ? paramMetaData.find(p => p.paramName === par) : undefined;
+
+        if (param) {
+            isFound = true;
+            if (!isValidType(methodParameterTypes[index], param.paramValue)) {
+                existingErrorMessages.push(`Param ${param.paramName} of type ${methodParameterTypes[index].name} is not valid`);
+            }
+        } else {
+            const queryString = queryStringMetaData ? queryStringMetaData.find(q => q.name === par) : undefined;
+            if (queryString) {
+                isFound = true;
+                if (!isValidType(methodParameterTypes[index], queryString.value)) {
+                    existingErrorMessages.push(`Parameter ${queryString.name} of type ${methodParameterTypes[index].name} is not valid`);
+                }
+            } else {
+                const optionalParameter = optionalParameters ? optionalParameters.find(o => o.parameterIndex === index) : undefined;
+                if (optionalParameter) {
+                    isFound = true;
+                }
+            }
+        }
+        if (!isFound) {
+            existingErrorMessages.push(`Parameter ${par} is missing in request`);
+        }
+    });
+    console.log("query", context.request.query);
+    console.log("existingErrorMessages", existingErrorMessages);
+    Reflect.defineMetadata(Constants.metadata.errorMessages, existingErrorMessages, context.controllerObject);
+}
+
+// function validateParamsWithMethodParameters(context: HttpContext, routeDescriptor: RouteDescriptor) {
+//     const methodParameters = getMethodParameters(context.controller, routeDescriptor.propertyKey);
+//     const routeParams = Reflect.getMetadata(Constants.metadata.routeParams, context.controllerObject) as ValidatorData[];
+//     const methodParameterTypes = Reflect.getMetadata("design:paramtypes", context.controllerObject, routeDescriptor.propertyKey);
+
+//     if (routeParams && methodParameters) {
+//         routeParams.forEach((param, index) => {
+//             const paramIndex = methodParameters.findIndex(p => p === param.paramName);
+//             const existingErrorMessages = Reflect.getMetadata(Constants.metadata.errorMessages, context.controllerObject) as string[] || [];
+//             if (paramIndex < 0) {
+//                 existingErrorMessages.push(`Method ${routeDescriptor.propertyKey} don't have parameter ${param.paramName}`);
+//             } else {
+//                 if (!isValidType(methodParameterTypes[paramIndex], param.paramValue)) {
+//                     existingErrorMessages.push(`Param ${param.paramName} of type ${methodParameterTypes[paramIndex].name} is not valid`);
+//                 }
+//             }
+//         });
+//     }
+// }
