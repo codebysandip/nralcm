@@ -8,6 +8,7 @@ import { HttpContext } from "./http-request";
 import { NotFoundException } from "../exceptions/not-found.exception";
 import { getMethodParameters } from "../common/get-method-parameters";
 import { isValidType } from "../common/check-valid-type";
+import { HttpMethod } from "./http-method.enum";
 
 export function UrlMapper(routeDescriptors: RouteDescriptor[], url: string, context: HttpContext): RouteDescriptor | null {
     // try to find route without param
@@ -60,7 +61,6 @@ function mapParams(context: HttpContext, routeDescriptors: RouteDescriptor[], ur
                                     parameterIndex: i,
                                     validator: "param",
                                     paramName: route.substring(openCurlyBraceIndex + 1, closeCurlyBraceIndex),
-                                    validate: function() {},
                                     paramValue: urlParts[i]
                                 };
                                 const validatorDataArr: ValidatorData[] = Reflect.getMetadata(Constants.metadata.routeParams, context.controllerObject) || [];
@@ -84,25 +84,6 @@ function mapParams(context: HttpContext, routeDescriptors: RouteDescriptor[], ur
 }
 
 function mapQueryString(context: HttpContext, routeDescriptor: RouteDescriptor) {
-    // const queryStringIndex = context.request.url.indexOf("?");
-    // if (queryStringIndex > 0) {
-    //     const splittedUrl = context.request.url.split("?");
-    //     if (splittedUrl.length == 2) {
-    //         const queryString = splittedUrl[1];
-    //         const queryStringArr: string[] = queryString.split("&");
-    //         queryStringArr.forEach(qs => {
-    //             const existingQueryStrings = Reflect.getMetadata(Constants.metadata.queryString, context.controllerObject,
-    //                                             routeDescriptor.propertyKey) as QueryString[] || [];
-    //             existingQueryStrings.push({
-    //                 name: qs.split("=")[0],
-    //                 value: qs.split("=")[1]
-    //             });
-    //             Reflect.defineMetadata(Constants.metadata.queryString, existingQueryStrings, context.controllerObject,
-    //                         routeDescriptor.propertyKey);
-    //         });
-    //     }
-    // }
-
     if (context.request.query) {
             const existingQueryStrings = Reflect.getMetadata(Constants.metadata.queryString, context.controllerObject,
                                             routeDescriptor.propertyKey) as QueryString[] || [];
@@ -118,12 +99,9 @@ function mapQueryString(context: HttpContext, routeDescriptor: RouteDescriptor) 
     }
 }
 
-function mapBodyWithParameter(context: HttpContext) {
-
-}
-
 function validateParamsAndQueryWithMethodParameters(context: HttpContext, routeDescriptor: RouteDescriptor) {
-    const methodParameterTypes = Reflect.getMetadata("design:paramtypes", context.controllerObject, routeDescriptor.propertyKey);
+    const methodParameterTypes = Reflect.getMetadata("design:paramtypes", context.controllerObject,
+                                    routeDescriptor.propertyKey) as Function[];
     const methodParameters = getMethodParameters(context.controller, routeDescriptor.propertyKey);
     const validationMetaData = Reflect.getMetadata(Constants.metadata.validation, context.controllerObject,
                                 routeDescriptor.propertyKey) as ValidatorData[];
@@ -136,8 +114,8 @@ function validateParamsAndQueryWithMethodParameters(context: HttpContext, routeD
         optionalParameters = validationMetaData.filter(m => m.validator === "Optional");
     }
 
-    const existingErrorMessages = Reflect.getMetadata(Constants.metadata.errorMessages, context.controllerObject) as string[] || [];
-
+    let existingErrorMessages = Reflect.getMetadata(Constants.metadata.errorMessages, context.controllerObject) as string[] || [];
+    const args = new Array(methodParameters.length);
     methodParameters.forEach((par, index) => {
         let isFound = false;
         const param = paramMetaData ? paramMetaData.find(p => p.paramName === par) : undefined;
@@ -146,6 +124,8 @@ function validateParamsAndQueryWithMethodParameters(context: HttpContext, routeD
             isFound = true;
             if (!isValidType(methodParameterTypes[index], param.paramValue)) {
                 existingErrorMessages.push(`Param ${param.paramName} of type ${methodParameterTypes[index].name} is not valid`);
+            } else {
+                args[index] = param.paramValue;
             }
         } else {
             const queryString = queryStringMetaData ? queryStringMetaData.find(q => q.name === par) : undefined;
@@ -153,6 +133,8 @@ function validateParamsAndQueryWithMethodParameters(context: HttpContext, routeD
                 isFound = true;
                 if (!isValidType(methodParameterTypes[index], queryString.value)) {
                     existingErrorMessages.push(`Parameter ${queryString.name} of type ${methodParameterTypes[index].name} is not valid`);
+                } else {
+                    args[index] = queryString.value;
                 }
             } else {
                 const optionalParameter = optionalParameters ? optionalParameters.find(o => o.parameterIndex === index) : undefined;
@@ -162,30 +144,44 @@ function validateParamsAndQueryWithMethodParameters(context: HttpContext, routeD
             }
         }
         if (!isFound) {
-            existingErrorMessages.push(`Parameter ${par} is missing in request`);
+            if (routeDescriptor.httpMethod === HttpMethod.GET) {
+                existingErrorMessages.push(`Parameter ${par} is missing in request`);
+            } else {
+                if (methodParameterTypes[index].name === "Number" || methodParameterTypes[index].name === "String"
+                        || methodParameterTypes[index].name === "Boolean") {
+                    existingErrorMessages.push(`Parameter ${par} is missing in request`);
+                } else {
+                    if (methodParameterTypes[index].name !== "Object") {
+                        const result = validateRequestBody(context, methodParameterTypes[index], par);
+                        existingErrorMessages = [...existingErrorMessages, ...result];
+                    }
+                    args[index] = context.request.body;
+                }
+            }
         }
     });
-    console.log("query", context.request.query);
-    console.log("existingErrorMessages", existingErrorMessages);
+    if (existingErrorMessages.length === 0) {
+        Reflect.defineMetadata(Constants.metadata.args, args, context.controllerObject);
+    }
     Reflect.defineMetadata(Constants.metadata.errorMessages, existingErrorMessages, context.controllerObject);
 }
 
-// function validateParamsWithMethodParameters(context: HttpContext, routeDescriptor: RouteDescriptor) {
-//     const methodParameters = getMethodParameters(context.controller, routeDescriptor.propertyKey);
-//     const routeParams = Reflect.getMetadata(Constants.metadata.routeParams, context.controllerObject) as ValidatorData[];
-//     const methodParameterTypes = Reflect.getMetadata("design:paramtypes", context.controllerObject, routeDescriptor.propertyKey);
+function validateRequestBody(context: HttpContext, paramtype: any, param: string): string[] {
+    const instance = new paramtype();
+    const validatorDataArr = Reflect.getMetadata(Constants.metadata.validation, instance) as ValidatorData[];
+    const errorMessages: string[] = [];
 
-//     if (routeParams && methodParameters) {
-//         routeParams.forEach((param, index) => {
-//             const paramIndex = methodParameters.findIndex(p => p === param.paramName);
-//             const existingErrorMessages = Reflect.getMetadata(Constants.metadata.errorMessages, context.controllerObject) as string[] || [];
-//             if (paramIndex < 0) {
-//                 existingErrorMessages.push(`Method ${routeDescriptor.propertyKey} don't have parameter ${param.paramName}`);
-//             } else {
-//                 if (!isValidType(methodParameterTypes[paramIndex], param.paramValue)) {
-//                     existingErrorMessages.push(`Param ${param.paramName} of type ${methodParameterTypes[paramIndex].name} is not valid`);
-//                 }
-//             }
-//         });
-//     }
-// }
+    if (validatorDataArr && validatorDataArr.length) {
+        const objectKeys = Object.keys(context.request.body);
+
+        validatorDataArr.forEach((validatorData, index) => {
+            const keyIndex = objectKeys.findIndex(key => key === validatorData.propertyKey);
+            const validationResult = validatorData.validate(keyIndex !== -1 ? context.request.body[objectKeys[keyIndex]] : undefined,
+                                        validatorData, instance);
+            if (typeof validationResult === "string" && validationResult) {
+                errorMessages.push(validationResult);
+            }
+        });
+    }
+    return errorMessages;
+} 

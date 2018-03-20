@@ -4,6 +4,7 @@ export const Constants = {
         routeParams: "routeParams",
         queryString: "queryString",
         errorMessages: "errorMessages",
-        validation: "validation"
+        validation: "validation",
+        args: "args"
     }
 };

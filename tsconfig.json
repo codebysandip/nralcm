@@ -6,6 +6,7 @@
         "strictNullChecks": true,
         "noImplicitReturns": true,
         "noImplicitAny": true,
+        "sourceMap": true,
         "rootDir": "src",
         "watch": true,
         "experimentalDecorators": true,

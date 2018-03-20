@@ -14,7 +14,7 @@ export class ProductController extends BaseController {
     }
 
     @Route("getAllProduct", HttpMethod.GET)
-    public getAllProducts(product: Product, id: string[], b: boolean, s: string, a: any, @Optional("object") o: Object) {
+    public getAllProducts(id: string, b: boolean, s: string, a: number, @Optional("object") o: number) {
         const data = this.productRepository.getAllProducts();
         return data;
     }
@@ -27,6 +27,11 @@ export class ProductController extends BaseController {
     @Route("getProductDetails", HttpMethod.GET)
     public getProductDetails(queryString: boolean, @Optional() optional: string) {
         return { data: queryString };
+    }
+
+    @Route("saveproduct", HttpMethod.POST)
+    public saveProduct(product: Product, id: string) {
+        return { data: product };
     }
 }
 
