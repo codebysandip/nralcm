@@ -7,10 +7,10 @@ This is a framework based on NodeJs to manage request lifecycle.
   HandlerDispatcher will be responsible for choosing right handler based on request type
 
 # HttpHandler
-Handler will responsible for request management. Handler will be first who will recieve request and response object in the chain. An application can have multiple handlers. For example a handler will be for rest api, another handler can be for images and other files. By implementing a HttpHandler anyone can their own process.
+Handler will responsible for request management. Handler will be first who will recieve request and response object in the chain. An application can have multiple handlers. For example a handler will be for rest api, another handler can be for images and other files. By implementing a HttpHandler anyone can implement their own process.
 
 # ExceptionHandler
-ExceptionHandler will be response handling errors at application level. This handler will get request, response and error object.
+ExceptionHandler will be recieve all errors at application level. This handler will get request, response and error object.
  
 # RouteMapping
 RouteMapping will be responsible for mapping of routes. Every route will map to a class (Controller). If Route will not exist then error will send to exception handler.
