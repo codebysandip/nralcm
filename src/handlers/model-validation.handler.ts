@@ -5,7 +5,8 @@ import { HttpContext } from "../infrastructure/http-request";
 import { ValidatorData } from "../validators/validator-data";
 import { UrlMapper } from "../infrastructure/url-mapper";
 import { Constants } from "../infrastructure/rest-api-constants";
-import { constants } from "zlib";
+import { getMethodParameters } from "../common/get-method-parameters";
+import { BadRequestException } from "../exceptions/bad-request.exception";
 
 export class ModelValidationHandler implements IModelValidation {
     private context: HttpContext;
@@ -18,7 +19,6 @@ export class ModelValidationHandler implements IModelValidation {
     public validate(context: HttpContext): boolean {
         this.context = context;
         // const instance = new target();
-        console.log("req params", context.request.query);
         const urlParts = this.getUrlParts(context.request.url);
         const url = urlParts.slice(1).join("/");
         // get all routes of controller
@@ -32,23 +32,28 @@ export class ModelValidationHandler implements IModelValidation {
                 return false;
             }
 
-            if (routeDescriptor && typeof routeDescriptor !== "boolean" && routeDescriptor.descriptor) {
+            const errorMessages = Reflect.getMetadata(Constants.metadata.errorMessages, context.controllerObject) as string[];
+            if (errorMessages && errorMessages.length) {
+                new BadRequestException(context, errorMessages);
+                return false;
+            }
+
+            if (routeDescriptor && routeDescriptor.descriptor) {
 
                 // get all parameters of api method
                 const apiMethodParameters: any[] = Reflect.getMetadata("design:paramtypes", context.controllerObject,
                                                         routeDescriptor.propertyKey);
                 if (apiMethodParameters && apiMethodParameters.length) {
-                    console.log("validation", Reflect.getMetadata("validation", context.controllerObject, routeDescriptor.propertyKey));
+                    // console.log("validation", Reflect.getMetadata("validation", context.controllerObject, routeDescriptor.propertyKey));
                     const validateModelResult = this.validateModel(routeDescriptor, context, apiMethodParameters);
                     if (!validateModelResult) {
                         return true;
                     }
                 }
                 const routeParams = Reflect.getMetadata(Constants.metadata.routeParams, context.controllerObject) as ValidatorData[];
-                console.log("route params", routeParams);
                 const dependencyInjection = new DependencyInjection(context);
                 const method = routeDescriptor.descriptor.value;
-                const data = method.apply(context.controller as Object, routeParams ? routeParams.map(param => param.paramValue) : []);
+                const data = method.apply(context.controllerObject as Object, routeParams ? routeParams.map(param => param.paramValue) : []);
                 context.response.json(data);
                 return true;
             }
@@ -68,7 +73,7 @@ export class ModelValidationHandler implements IModelValidation {
 
     private validateModel(routeDescriptor: RouteDescriptor, context: HttpContext, apiMethodParameters: any[]): boolean {
         // get all validation data
-        const methodParameters: string[] = this.getMethodParameters(routeDescriptor.descriptor.value, routeDescriptor.propertyKey);
+        const methodParameters: string[] = getMethodParameters(routeDescriptor.descriptor.value, routeDescriptor.propertyKey);
         // apiMethodParameters.forEach(val => {
         //     const validationData = Reflect.getMetadata("validation", new val());
         //     this.getMethodParameters(routeDescriptor.descriptor.value, routeDescriptor.propertyKey);
@@ -77,23 +82,9 @@ export class ModelValidationHandler implements IModelValidation {
         return true;
     }
 
-    private getMethodParameters(target: any, methodName: string) {
-        const methodString = target.toString() as string;
-        let methodParameters: string[] = [];
-        if (methodString) {
-            let args = methodString.substr(methodString.indexOf(methodName));
-            args = args.substring(args.indexOf("(") + 1, args.indexOf(")"));
-            methodParameters = args.replace(/ /g, "").split(",");
-            this.validateParams(methodParameters, target);
-            console.log("methodParameters", methodParameters);
-        }
-        return methodParameters;
-        // console.log("constructorParameters", constructorParameters);
-    }
-
     private validateParams(args: string[], target: Object) {
         if (this.context.controller) {
-            const params: ValidatorData[] = Reflect.getMetadata(Constants.routeParams, this.context.controller);
+            const params: ValidatorData[] = Reflect.getMetadata(Constants.metadata.routeParams, this.context.controller);
             console.log("params", params);
         }
     }
