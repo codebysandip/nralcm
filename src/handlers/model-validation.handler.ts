@@ -6,6 +6,7 @@ import { ValidatorData } from "../validators/validator-data";
 import { UrlMapper } from "../infrastructure/url-mapper";
 import { Constants } from "../infrastructure/rest-api-constants";
 import { getMethodParameters } from "../common/get-method-parameters";
+import { BadRequestException } from "../exceptions/bad-request.exception";
 
 export class ModelValidationHandler implements IModelValidation {
     private context: HttpContext;
@@ -31,7 +32,13 @@ export class ModelValidationHandler implements IModelValidation {
                 return false;
             }
 
-            if (routeDescriptor && typeof routeDescriptor !== "boolean" && routeDescriptor.descriptor) {
+            const errorMessages = Reflect.getMetadata(Constants.metadata.errorMessages, context.controllerObject) as string[];
+            if (errorMessages && errorMessages.length) {
+                new BadRequestException(context, errorMessages);
+                return false;
+            }
+
+            if (routeDescriptor && routeDescriptor.descriptor) {
 
                 // get all parameters of api method
                 const apiMethodParameters: any[] = Reflect.getMetadata("design:paramtypes", context.controllerObject,

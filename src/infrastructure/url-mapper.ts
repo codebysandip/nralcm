@@ -9,7 +9,7 @@ import { NotFoundException } from "../exceptions/not-found.exception";
 import { getMethodParameters } from "../common/get-method-parameters";
 import { isValidType } from "../common/check-valid-type";
 
-export function UrlMapper(routeDescriptors: RouteDescriptor[], url: string, context: HttpContext): RouteDescriptor | false {
+export function UrlMapper(routeDescriptors: RouteDescriptor[], url: string, context: HttpContext): RouteDescriptor | null {
     // try to find route without param
     const routeDescriptor = routeDescriptors.find(routeDescriptor => routeDescriptor.route === url);
     if (routeDescriptor) {
@@ -25,7 +25,8 @@ export function UrlMapper(routeDescriptors: RouteDescriptor[], url: string, cont
         return paramMapResult;
     }
     new NotFoundException(context);
-    return false;
+    // tslint:disable-next-line:no-null-keyword
+    return null;
 }
 
 function mapApiMethod(context: HttpContext) {
@@ -83,23 +84,37 @@ function mapParams(context: HttpContext, routeDescriptors: RouteDescriptor[], ur
 }
 
 function mapQueryString(context: HttpContext, routeDescriptor: RouteDescriptor) {
-    const queryStringIndex = context.request.url.indexOf("?");
-    if (queryStringIndex > 0) {
-        const splittedUrl = context.request.url.split("?");
-        if (splittedUrl.length == 2) {
-            const queryString = splittedUrl[1];
-            const queryStringArr: string[] = queryString.split("&");
-            queryStringArr.forEach(qs => {
-                const existingQueryStrings = Reflect.getMetadata(Constants.metadata.queryString, context.controllerObject,
-                                                routeDescriptor.propertyKey) as QueryString[] || [];
+    // const queryStringIndex = context.request.url.indexOf("?");
+    // if (queryStringIndex > 0) {
+    //     const splittedUrl = context.request.url.split("?");
+    //     if (splittedUrl.length == 2) {
+    //         const queryString = splittedUrl[1];
+    //         const queryStringArr: string[] = queryString.split("&");
+    //         queryStringArr.forEach(qs => {
+    //             const existingQueryStrings = Reflect.getMetadata(Constants.metadata.queryString, context.controllerObject,
+    //                                             routeDescriptor.propertyKey) as QueryString[] || [];
+    //             existingQueryStrings.push({
+    //                 name: qs.split("=")[0],
+    //                 value: qs.split("=")[1]
+    //             });
+    //             Reflect.defineMetadata(Constants.metadata.queryString, existingQueryStrings, context.controllerObject,
+    //                         routeDescriptor.propertyKey);
+    //         });
+    //     }
+    // }
+
+    if (context.request.query) {
+            const existingQueryStrings = Reflect.getMetadata(Constants.metadata.queryString, context.controllerObject,
+                                            routeDescriptor.propertyKey) as QueryString[] || [];
+            Object.keys(context.request.query).forEach(qs => {
                 existingQueryStrings.push({
-                    name: qs.split("=")[0],
-                    value: qs.split("=")[1]
+                    name: qs,
+                    value: context.request.query[qs]
                 });
-                Reflect.defineMetadata(Constants.metadata.queryString, existingQueryStrings, context.controllerObject,
-                            routeDescriptor.propertyKey);
             });
-        }
+
+            Reflect.defineMetadata(Constants.metadata.queryString, existingQueryStrings, context.controllerObject,
+                routeDescriptor.propertyKey);
     }
 }
 
@@ -150,6 +165,7 @@ function validateParamsAndQueryWithMethodParameters(context: HttpContext, routeD
             existingErrorMessages.push(`Parameter ${par} is missing in request`);
         }
     });
+    console.log("query", context.request.query);
     console.log("existingErrorMessages", existingErrorMessages);
     Reflect.defineMetadata(Constants.metadata.errorMessages, existingErrorMessages, context.controllerObject);
 }
