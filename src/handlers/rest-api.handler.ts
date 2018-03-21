@@ -1,5 +1,5 @@
 import { IHttpHandler } from "../infrastructure/IHttpHandler";
-import { HttpContext } from "../infrastructure/http-request";
+import { HttpContext } from "../infrastructure/http-context";
 import { HttpResponse } from "../infrastructure/http-response";
 import { IRoute } from "../infrastructure/route";
 import { routes } from "../app.routes";
@@ -22,7 +22,7 @@ export class RestApiHandler implements IHttpHandler {
     private routes: IRoute[] = routes;
     private dependencyInjection: DependencyInjection;
     private config: RestApiConfig;
-    private restApiConfiguration = new RestApiConfiguration();
+    private restApiConfiguration = RestApiConfiguration.getInstance();
 
     constructor() {
         this.config = new RestApiConfig();
@@ -53,7 +53,6 @@ export class RestApiHandler implements IHttpHandler {
                     return;
                 }
             }
-            console.log("not found");
             throw new NotFoundException(context);
         } catch (e) {
             if (this.restApiConfiguration.exceptionHandler && !context.response.headersSent) {

@@ -1,23 +1,17 @@
 import { IHttpHandler } from "./IHttpHandler";
 import { Response, Request } from "express";
-
+import { HttpConfiguration } from "./http-configuration";
 
 export class HandlerDispatcher {
     private static handlerDispatcher: HandlerDispatcher;
-    private handlers: [string, IHttpHandler][] = [];
 
     private constructor() {
 
     }
 
-    public add(url: string,  handler: IHttpHandler) {
-        this.handlers.push([url, handler]);
-    }
 
-    public processHandler(request: Request, response: Response) {
-        const matchedHandler = this.handlers.find(handler =>  {
-            return request.url.match(handler[0]) ? true : false;
-        });
+    public processHandler(request: Request, response: Response, httpConfiguration: HttpConfiguration) {
+        const matchedHandler = httpConfiguration.getHandler(request.url);
         if (matchedHandler && matchedHandler[1]) {
             matchedHandler[1].processRequest(request, response);
         } else {

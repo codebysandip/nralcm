@@ -1,12 +1,13 @@
 import { IModelValidation } from "../infrastructure/IModelValidation";
 import { DependencyInjection } from "../infrastructure/dependency-injection";
 import { RouteDescriptor } from "../infrastructure/route-descriptor";
-import { HttpContext } from "../infrastructure/http-request";
+import { HttpContext } from "../infrastructure/http-context";
 import { ValidatorData } from "../validators/validator-data";
 import { UrlMapper } from "../infrastructure/url-mapper";
 import { Constants } from "../infrastructure/rest-api-constants";
 import { getMethodParameters } from "../common/get-method-parameters";
 import { BadRequestException } from "../exceptions/bad-request.exception";
+import { ServerResponse } from "http";
 
 export class ModelValidationHandler implements IModelValidation {
     private context: HttpContext;
@@ -35,16 +36,16 @@ export class ModelValidationHandler implements IModelValidation {
             const errorMessages = Reflect.getMetadata(Constants.metadata.errorMessages, context.controllerObject) as string[];
             if (errorMessages && errorMessages.length) {
                 throw new BadRequestException(context, errorMessages);
-                // return false;
             }
 
             if (routeDescriptor && routeDescriptor.descriptor) {
                 const dependencyInjection = new DependencyInjection(context);
                 const args = Reflect.getMetadata(Constants.metadata.args, context.controllerObject) as any[];
-                console.log("args", args);
                 const method = routeDescriptor.descriptor.value;
                 const data = method.apply(context.controllerObject as Object, args);
-                context.response.json(data);
+                if (!(data instanceof ServerResponse)) {
+                    context.response.json(data);
+                }
                 return true;
             }
         }

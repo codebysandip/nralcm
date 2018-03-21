@@ -3,7 +3,6 @@ import { ProductRepository } from "../repository/product.repository";
 import { Product } from "../models/product";
 import { BaseController } from "../infrastructure/base-controller";
 import { Route } from "../decorators/route.decorator";
-import { Controller } from "../decorators/controller.decorator";
 import { Optional } from "../validators/optional.validator";
 import { HttpMethod } from "../infrastructure/http-method.enum";
 
@@ -31,7 +30,7 @@ export class ProductController extends BaseController {
 
     @Route("saveproduct", HttpMethod.POST)
     public saveProduct(product: Product, id: string) {
-        return { data: product };
+        return this.response.send({ data: product });
     }
 }
 

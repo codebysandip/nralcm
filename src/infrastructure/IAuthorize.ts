@@ -1,4 +1,4 @@
-import { HttpContext } from "./http-request";
+import { HttpContext } from "./http-context";
 import { HttpResponse } from "./http-response";
 import { UnAuthorizeException } from "../exceptions/unauthorize.exception";
 

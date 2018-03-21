@@ -1,5 +1,5 @@
 import { IExceptionHandler } from "../infrastructure/IExceptionHandler";
-import { HttpContext } from "../infrastructure/http-request";
+import { HttpContext } from "../infrastructure/http-context";
 import { ServerErrorException } from "../exceptions/server-error.exception";
 
 export class ExceptionHandler implements IExceptionHandler {

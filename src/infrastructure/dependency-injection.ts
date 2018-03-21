@@ -1,6 +1,8 @@
 import "reflect-metadata/Reflect";
 import { Request, Response } from "express";
-import { HttpContext } from "./http-request";
+import { HttpContext } from "./http-context";
+import { HttpResponse } from "./http-response";
+import { RestApiConfiguration } from "./rest-api.configuration";
 
 export class DependencyInjection {
     constructor(private context: HttpContext) {
@@ -16,6 +18,8 @@ export class DependencyInjection {
                     this.circularInjection(val, this.context.controllerObject[constructorParameters[index]]);
             });
             this.context.controllerObject["request"] = this.context.request;
+            this.context.controllerObject["response"] = new HttpResponse(RestApiConfiguration.getInstance().httpResponseHandler,
+                                                                this.context);
         }
     }
 

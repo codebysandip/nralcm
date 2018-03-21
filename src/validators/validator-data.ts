@@ -4,7 +4,7 @@ export interface ValidatorData {
     validator: string;
     displayName?: string;
     message?: string;
-    validate?: ValidateFunction;
+    validate: ValidateFunction;
     parameterIndex?: number;
     paramName?: string;
     paramValue?: any;

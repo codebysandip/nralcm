@@ -1,5 +1,5 @@
 import { IAuthorize } from "../infrastructure/IAuthorize";
-import { HttpContext } from "../infrastructure/http-request";
+import { HttpContext } from "../infrastructure/http-context";
 import { HttpResponse } from "../infrastructure/http-response";
 import { UnAuthorizeException } from "../exceptions/unauthorize.exception";
 

@@ -4,11 +4,12 @@ import { ValidatorData } from "../validators/validator-data";
 import { Constants } from "../infrastructure/rest-api-constants";
 import { QueryString } from "../infrastructure/query-string";
 import { constants } from "os";
-import { HttpContext } from "./http-request";
+import { HttpContext } from "./http-context";
 import { NotFoundException } from "../exceptions/not-found.exception";
 import { getMethodParameters } from "../common/get-method-parameters";
 import { isValidType } from "../common/check-valid-type";
 import { HttpMethod } from "./http-method.enum";
+import { ParamData } from "../common/model/param-data";
 
 export function UrlMapper(routeDescriptors: RouteDescriptor[], url: string, context: HttpContext): RouteDescriptor | null {
     // try to find route without param
@@ -38,44 +39,39 @@ function mapParams(context: HttpContext, routeDescriptors: RouteDescriptor[], ur
     for (let index = 0; index < routeDescriptors.length; index++) {
         const routeParts = routeDescriptors[index].route.startsWith("/") ? routeDescriptors[index].route.substring(1).split("/") : routeDescriptors[index].route.split("/");
         const urlParts = url.startsWith("/") ? url.substring(1).split("/") : url.split("/");
-        if (routeParts.length === urlParts.length && routeDescriptors[index].route.indexOf("{") >= 0) {
+        if (routeParts.length === urlParts.length && routeDescriptors[index].route.indexOf("{") >= 0 && routeDescriptors[index].route.indexOf("}") >= 0) {
             const nonParamsRouteParts = routeParts.filter(route => route.indexOf("{") === -1 || route.indexOf("}") === -1);
-            const nonParamsUrlParts = routeParts.filter(route => route.indexOf("{") === -1 || route.indexOf("}") === -1);
-            if (nonParamsRouteParts.length === nonParamsUrlParts.length) {
-                let isMatched = false;
-                nonParamsRouteParts.forEach((routePart, index) => {
-                    if (nonParamsUrlParts.find(urlPart => urlPart === routePart)) {
-                        isMatched = true;
-                    } else {
-                        isMatched = false;
+            let isMatched = false;
+            nonParamsRouteParts.forEach((routePart, index) => {
+                if (urlParts.find(urlPart => urlPart === routePart)) {
+                    isMatched = true;
+                } else {
+                    isMatched = false;
+                }
+            });
+            if (isMatched) {
+                routeParts.forEach((route, i) => {
+                    const openCurlyBraceIndex = route.indexOf("{");
+                    const closeCurlyBraceIndex = route.indexOf("}");
+                    if (openCurlyBraceIndex >= 0 && closeCurlyBraceIndex >= 0) {
+                        if (urlParts[i]) {
+                            const paramData: ParamData = {
+                                paramName: route.substring(openCurlyBraceIndex + 1, closeCurlyBraceIndex),
+                                paramValue: urlParts[i]
+                            };
+                            const paramMetaDataArr: ParamData[] = Reflect.getMetadata(Constants.metadata.routeParams,
+                                    context.controllerObject, routeDescriptors[index].propertyKey) || [];
+                            paramMetaDataArr.push(paramData);
+                            Reflect.defineMetadata(Constants.metadata.routeParams, paramMetaDataArr,
+                                context.controllerObject, routeDescriptors[index].propertyKey);
+                        } else {
+                            const existingErrorMessages = Reflect.getMetadata(Constants.metadata.emptyRouteParams, context.controllerObject) as string[] || [];
+                            existingErrorMessages.push(`Parametr ${route.substring(openCurlyBraceIndex + 1, closeCurlyBraceIndex)} is missing`);
+                            Reflect.defineMetadata(Constants.metadata.emptyRouteParams, existingErrorMessages, context.controllerObject);
+                        }
                     }
                 });
-                if (isMatched) {
-                    routeParts.forEach((route, i) => {
-                        const openCurlyBraceIndex = route.indexOf("{");
-                        const closeCurlyBraceIndex = route.indexOf("}");
-                        if (openCurlyBraceIndex >= 0 && closeCurlyBraceIndex >= 0) {
-                            if (urlParts[i]) {
-                                const validatorData: ValidatorData = {
-                                    propertyKey: routeDescriptors[index].propertyKey,
-                                    parameterIndex: i,
-                                    validator: "param",
-                                    paramName: route.substring(openCurlyBraceIndex + 1, closeCurlyBraceIndex),
-                                    paramValue: urlParts[i]
-                                };
-                                const validatorDataArr: ValidatorData[] = Reflect.getMetadata(Constants.metadata.routeParams, context.controllerObject) || [];
-                                validatorDataArr.push(validatorData);
-                                Reflect.defineMetadata(Constants.metadata.routeParams, validatorDataArr, context.controllerObject);
-                            } else {
-                                const existingErrorMessages = Reflect.getMetadata(Constants.metadata.emptyRouteParams, context.controllerObject) as string[] || [];
-                                existingErrorMessages.push(`Parametr ${route.substring(openCurlyBraceIndex + 1, closeCurlyBraceIndex)} is missing`);
-                                Reflect.defineMetadata(Constants.metadata.emptyRouteParams, existingErrorMessages, context.controllerObject);
-                            }
-                        }
-                    });
-                    // validateParamsWithMethodParameters(context, routeDescriptors[index]);
-                    return routeDescriptors[index];
-                }
+                return routeDescriptors[index];
             }
         }
     }
@@ -106,7 +102,7 @@ function validateParamsAndQueryWithMethodParameters(context: HttpContext, routeD
     const validationMetaData = Reflect.getMetadata(Constants.metadata.validation, context.controllerObject,
                                 routeDescriptor.propertyKey) as ValidatorData[];
     const paramMetaData = Reflect.getMetadata(Constants.metadata.routeParams, context.controllerObject,
-                            routeDescriptor.propertyKey) as ValidatorData[];
+                            routeDescriptor.propertyKey) as ParamData[] || [];
     const queryStringMetaData = Reflect.getMetadata(Constants.metadata.queryString, context.controllerObject,
                                     routeDescriptor.propertyKey) as QueryString[];
     let optionalParameters: ValidatorData[] = [];
@@ -118,7 +114,7 @@ function validateParamsAndQueryWithMethodParameters(context: HttpContext, routeD
     const args = new Array(methodParameters.length);
     methodParameters.forEach((par, index) => {
         let isFound = false;
-        const param = paramMetaData ? paramMetaData.find(p => p.paramName === par) : undefined;
+        const param = paramMetaData.find(p => p.paramName === par);
 
         if (param) {
             isFound = true;
@@ -184,4 +180,4 @@ function validateRequestBody(context: HttpContext, paramtype: any, param: string
         });
     }
     return errorMessages;
-} 
+}

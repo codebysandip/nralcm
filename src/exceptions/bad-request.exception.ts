@@ -1,4 +1,4 @@
-import { HttpContext } from "../infrastructure/http-request";
+import { HttpContext } from "../infrastructure/http-context";
 
 export class BadRequestException {
     constructor(context: HttpContext, message: any) {

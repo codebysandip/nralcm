@@ -19,6 +19,6 @@ export function Optional(displayName?: string, message?: string) {
     };
 }
 
-function validate() {
-
+function validate(value: any, validatorData: ValidatorData, type: any): true|string {
+    return true;
 }

@@ -1,4 +1,4 @@
-import { HttpContext } from "../infrastructure/http-request";
+import { HttpContext } from "../infrastructure/http-context";
 
 export class UnAuthenticateException {
     constructor(context: HttpContext) {

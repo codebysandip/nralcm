@@ -1,6 +1,6 @@
 import { IAuthHandler } from "../infrastructure/IAuthHandler";
 import "reflect-metadata/Reflect";
-import { HttpContext } from "../infrastructure/http-request";
+import { HttpContext } from "../infrastructure/http-context";
 import { RestApiConfiguration } from "../infrastructure/rest-api.configuration";
 import { UnAuthenticateException } from "../exceptions/unauthenticate.exception";
 import { UnAuthorizeException } from "../exceptions/unauthorize.exception";

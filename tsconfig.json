@@ -10,7 +10,8 @@
         "rootDir": "src",
         "watch": true,
         "experimentalDecorators": true,
-        "emitDecoratorMetadata": true
+        "emitDecoratorMetadata": true,
+        "noEmitOnError": true
     },
     "include": [
         "src/**/*.ts"
