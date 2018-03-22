@@ -1,6 +1,9 @@
-import { RestApiConfiguration } from "../infrastructure/rest-api.configuration";
 import { HttpContext } from "./http-context";
 
+/**
+ * Implement this interface for authentication
+ * and authorization
+ */
 export interface IAuthHandler {
-    handle(restApiConfiguration: RestApiConfiguration, target: any, context: HttpContext): boolean;
+    handle(context: HttpContext): boolean;
 }

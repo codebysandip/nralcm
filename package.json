@@ -1,7 +1,7 @@
 {
-  "name": "nodelearning",
-  "version": "1.0.0",
-  "description": "",
+  "name": "nrlcm",
+  "version": "0.0.1-alpha",
+  "description": "This is a framework based on NodeJs to manage request lifecycle",
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

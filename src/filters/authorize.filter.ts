@@ -1,10 +1,13 @@
 import { IAuthorize } from "../infrastructure/IAuthorize";
 import { HttpContext } from "../infrastructure/http-context";
-import { HttpResponse } from "../infrastructure/http-response";
-import { UnAuthorizeException } from "../exceptions/unauthorize.exception";
 
 export class AuthorizationFilter implements IAuthorize {
-    public authorize(context: HttpContext, roles: string[]): boolean|UnAuthorizeException {
+    /**
+     * Method for check authorization of request
+     * @param context HttpContext Object
+     * @param roles Roles for access of api
+     */
+    public authorize(context: HttpContext, roles: string[]): boolean {
         return true;
         // return new UnAuthorizeException(context);
     }

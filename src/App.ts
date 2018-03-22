@@ -1,6 +1,5 @@
 import * as express from "express";
 import { HandlerDispatcher } from "./infrastructure/HandlerDispatcher";
-import { RestApiHandler } from "./handlers/rest-api.handler";
 import * as bodyparser from "body-parser";
 import { Request, Response } from "express-serve-static-core";
 import { getContext } from "./common/get-context";

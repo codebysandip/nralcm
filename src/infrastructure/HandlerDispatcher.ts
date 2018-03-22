@@ -1,4 +1,3 @@
-import { IHttpHandler } from "./IHttpHandler";
 import { Response, Request } from "express";
 import { HttpConfiguration } from "./http-configuration";
 
@@ -15,7 +14,7 @@ export class HandlerDispatcher {
         if (matchedHandler && matchedHandler[1]) {
             matchedHandler[1].processRequest(request, response);
         } else {
-            // return not found
+            response.type("application/json").status(400).json({ message: "No handler found for this request"});
         }
     }
 

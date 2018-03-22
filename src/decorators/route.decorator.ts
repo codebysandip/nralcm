@@ -1,10 +1,13 @@
-import { IRoute } from "../infrastructure/route";
 import "reflect-metadata/Reflect";
 import { RouteDescriptor } from "../infrastructure/route-descriptor";
-import { routes } from "../app.routes";
 import { HttpMethod } from "../infrastructure/http-method.enum";
 import { getMethodParameters } from "../common/get-method-parameters";
 
+/**
+ * Route Decorator to define routes in controller
+ * @param route route string for api method
+ * @param httpMethod HttpMethod of api
+ */
 export function Route(route: string, httpMethod: HttpMethod) {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
         if (route.indexOf("{") >= 0 && route.indexOf("}") >= 0) {

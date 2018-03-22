@@ -1,13 +1,20 @@
 import { IAuthentication } from "../infrastructure/IAuthentication";
 import { HttpContext } from "../infrastructure/http-context";
-import { HttpResponse } from "../infrastructure/http-response";
-import { UnAuthenticateException } from "../exceptions/unauthenticate.exception";
 
+/**
+ * Authentication for authentication of request
+ */
 export class AuthenticationFilter implements IAuthentication {
-    public authenticate(context: HttpContext): boolean | UnAuthenticateException {
+
+    /**
+     * Method for check authentication of request
+     * @param context HttpContext Object
+     * @returns true, If not authenticated throws UnAuthenticateException
+     */
+    public authenticate(context: HttpContext): boolean {
         if (context.request.header("Authorization")) {
             return true;
         }
-        return new UnAuthenticateException(context);
+        return false;
     }
 }

@@ -1,8 +1,13 @@
-import { Request, Response } from "express";
 import { HttpContext } from "./http-context";
-import { HttpResponse } from "./http-response";
-import { UnAuthenticateException } from "../exceptions/unauthenticate.exception";
 
+/**
+ * Interface for implementation of Authentication
+ */
 export interface IAuthentication {
-    authenticate(context: HttpContext): boolean | UnAuthenticateException;
+    /**
+     * Method for check authentication of request
+     * @param context HttpContext Object
+     * @returns true or false
+     */
+    authenticate(context: HttpContext): boolean;
 }
