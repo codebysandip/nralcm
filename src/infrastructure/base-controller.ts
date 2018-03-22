@@ -1,4 +1,3 @@
-import { Request, Response } from "express-serve-static-core";
 import { HttpResponse } from "./http-response";
 
 

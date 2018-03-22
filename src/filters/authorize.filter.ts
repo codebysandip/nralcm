@@ -8,7 +8,6 @@ export class AuthorizationFilter implements IAuthorize {
      * @param roles Roles for access of api
      */
     public authorize(context: HttpContext, roles: string[]): boolean {
-        return true;
-        // return new UnAuthorizeException(context);
+        return context.user.isAuthorized(roles);
     }
 }

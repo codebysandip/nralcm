@@ -4,6 +4,8 @@ import { AuthorizationFilter } from "./filters/authorize.filter";
 import { ExceptionHandler } from "./handlers/exception.handler";
 import { ModelValidationHandler } from "./handlers/model-validation.handler";
 import { HttpResponseHandler } from "./handlers/http-response.handler";
+import { TestFilter } from "./filters/test.filter";
+import { Test1Filter } from "./filters/test1.filter";
 
 /**
  * Rest Api Configuration class to register
@@ -11,10 +13,12 @@ import { HttpResponseHandler } from "./handlers/http-response.handler";
  */
 export class RestApiConfig {
     public register(config: RestApiConfiguration) {
-        config.setAuthenticationFilter(new AuthenticationFilter());
-        config.setAuthorizeFilter(new AuthorizationFilter());
-        config.setExceptionHandler(new ExceptionHandler());
-        config.setModelValidationHandler(new ModelValidationHandler());
-        config.setHttpResponseHandler(new HttpResponseHandler());
+        config.AuthenticationFilter = new AuthenticationFilter();
+        config.AuthorizeFilter = new AuthorizationFilter();
+        config.ExceptionHandler = new ExceptionHandler();
+        config.ModelValidationHandler = new ModelValidationHandler();
+        config.HttpResponseHandler = new HttpResponseHandler();
+        config.addFilter(new TestFilter());
+        config.addFilter(new Test1Filter());
     }
 }

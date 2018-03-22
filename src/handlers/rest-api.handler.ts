@@ -13,6 +13,7 @@ import { BadRequestException } from "../exceptions/bad-request.exception";
 import { DependencyInjection } from "../infrastructure/dependency-injection";
 import { Constants } from "../infrastructure/rest-api-constants";
 import { ServerResponse } from "http";
+import { FilterExecuter } from "../infrastructure/filter-executer";
 
 export class RestApiHandler implements IHttpHandler {
     private config: RestApiConfig;
@@ -34,32 +35,35 @@ export class RestApiHandler implements IHttpHandler {
 
             const routeDescriptor = ApiMethodMapper(context);
 
-            if (this.restApiConfiguration.getAuthHandler()) {
-                const authResult = this.restApiConfiguration.getAuthHandler().handle(context);
+            if (this.restApiConfiguration.AuthHandler) {
+                const authResult = this.restApiConfiguration.AuthHandler.handle(context, this.restApiConfiguration);
                 if (!authResult) {
                     throw new UnAuthenticateException(context);
                 }
             }
 
-            if (this.restApiConfiguration.getModelValidationHandler()) {
-                const modelValidationHandlerResult = this.restApiConfiguration.getModelValidationHandler().validate(context, routeDescriptor);
+            if (this.restApiConfiguration.ModelValidationHandler) {
+                const modelValidationHandlerResult = this.restApiConfiguration.ModelValidationHandler.validate(context, routeDescriptor);
                 if (modelValidationHandlerResult.length) {
                     throw new BadRequestException(context, modelValidationHandlerResult);
                 }
             }
 
+            const filterExecuter = new FilterExecuter(this.restApiConfiguration, context, routeDescriptor);
+            filterExecuter.executeBeforeActionExceduted();
             // Resolve Dependency of Controller
             new DependencyInjection(context);
             const args = Reflect.getMetadata(Constants.metadata.args, context.controllerObject) as any[];
             const method = routeDescriptor.descriptor.value;
             const data = method.apply(context.controllerObject as Object, args);
             if (!(data instanceof ServerResponse)) {
+                filterExecuter.executeAfterActionExceduted();
                 context.response.json(data);
             }
             return;
-    } catch (e) {
-            if (this.restApiConfiguration.getExceptionHandler() && !context.response.headersSent) {
-                this.restApiConfiguration.getExceptionHandler().handleException(context, e);
+        } catch (e) {
+            if (this.restApiConfiguration.ExceptionHandler && !context.response.headersSent) {
+                this.restApiConfiguration.ExceptionHandler.handleException(context, e);
             }
         }
     }

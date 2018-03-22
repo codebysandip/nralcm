@@ -112,10 +112,12 @@ export class ModelValidationHandler implements IModelValidation {
 
             validatorDataArr.forEach((validatorData) => {
                 const keyIndex = objectKeys.findIndex(key => key === validatorData.propertyKey);
-                const validationResult = validatorData.validate(keyIndex !== -1 ? context.request.body[objectKeys[keyIndex]] : undefined,
-                    validatorData, instance);
-                if (typeof validationResult === "string" && validationResult) {
-                    errorMessages.push(validationResult);
+                if (validatorData.validate) {
+                    const validationResult = validatorData.validate(keyIndex !== -1 ? context.request.body[objectKeys[keyIndex]] : undefined,
+                        validatorData, instance);
+                    if (typeof validationResult === "string" && validationResult) {
+                        errorMessages.push(validationResult);
+                    }
                 }
             });
         }

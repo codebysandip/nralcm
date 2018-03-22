@@ -13,11 +13,12 @@ export function Route(route: string, httpMethod: HttpMethod) {
         if (route.indexOf("{") >= 0 && route.indexOf("}") >= 0) {
             const routeParts = route.startsWith("/") ? route.substring(1).split("/") : route.split("/");
             const methodParameters = getMethodParameters(descriptor.value, propertyKey);
+
             routeParts.forEach(ro => {
-                const openCurlyBraceIndex = route.indexOf("{");
-                const closeCurlyBraceIndex = route.indexOf("}");
+                const openCurlyBraceIndex = ro.indexOf("{");
+                const closeCurlyBraceIndex = ro.indexOf("}");
                 if (openCurlyBraceIndex >= 0 && closeCurlyBraceIndex >= 0) {
-                    const paramName = route.substring(openCurlyBraceIndex + 1, closeCurlyBraceIndex);
+                    const paramName = ro.substring(openCurlyBraceIndex + 1, closeCurlyBraceIndex);
                     if (methodParameters.findIndex(p => p === paramName) === -1) {
                         throw new Error(`Paramerter ${paramName} is missing in method ${propertyKey}`);
                     }
