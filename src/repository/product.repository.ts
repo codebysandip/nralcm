@@ -1,7 +1,5 @@
-import { Repository } from "../decorators/repository.decorator";
 import { SomeClass } from "./some.repository";
 
-@Repository
 export class ProductRepository {
     constructor(private someClass: SomeClass) {
 

@@ -1,29 +1,22 @@
 import { IHttpHandler } from "../infrastructure/IHttpHandler";
-import { HttpContext } from "../infrastructure/http-request";
-import { HttpResponse } from "../infrastructure/http-response";
-import { IRoute } from "../infrastructure/route";
-import { routes } from "../app.routes";
+import { HttpContext } from "../infrastructure/http-context";
 import "reflect-metadata/Reflect";
-import { ProductController } from "../controllers/product.controller";
-import { RouteDescriptor } from "../infrastructure/route-descriptor";
-import { IAuthentication } from "../infrastructure/IAuthentication";
-import { AuthenticationFilter } from "../filters/authentication.filter";
-import { IAuthorize } from "../infrastructure/IAuthorize";
-import { AuthorizationFilter } from "../filters/authorize.filter";
-import { DependencyInjection } from "../infrastructure/dependency-injection";
-import { Request } from "express-serve-static-core";
-import { Response } from "express-serve-static-core";
 import { RestApiConfig } from "../rest-api.config";
 import { RestApiConfiguration } from "../infrastructure/rest-api.configuration";
+import { getContext } from "../common/get-context";
+import { Request, Response } from "express-serve-static-core";
+import { ControllerMapper } from "../infrastructure/controller-mapper";
+import { IRoute } from "../infrastructure/route";
+import { ApiMethodMapper } from "../infrastructure/api-method-mapper";
 import { UnAuthenticateException } from "../exceptions/unauthenticate.exception";
-import { UnAuthorizeException } from "../exceptions/unauthorize.exception";
-import { NotFoundException } from "../exceptions/not-found.exception";
+import { BadRequestException } from "../exceptions/bad-request.exception";
+import { DependencyInjection } from "../infrastructure/dependency-injection";
+import { Constants } from "../infrastructure/rest-api-constants";
+import { ServerResponse } from "http";
 
 export class RestApiHandler implements IHttpHandler {
-    private routes: IRoute[] = routes;
-    private dependencyInjection: DependencyInjection;
     private config: RestApiConfig;
-    private restApiConfiguration = new RestApiConfiguration();
+    private restApiConfiguration = RestApiConfiguration.getInstance();
 
     constructor() {
         this.config = new RestApiConfig();
@@ -31,71 +24,44 @@ export class RestApiHandler implements IHttpHandler {
     }
 
     public processRequest(req: Request, res: Response): void {
-        const context: HttpContext = this.getContext(req, res);
+        const context: HttpContext = getContext(req, res);
         try {
-            const urlParts = this.getUrlParts(req.url);
-            const route = this.routes.find(route => urlParts[0] == route.path);
-
-            if (route && urlParts.length > 1) {
+            const route: IRoute = ControllerMapper(context);
+            if (route) {
                 context.controller = route.controller;
                 context.controllerObject = new route.controller();
-                if (this.restApiConfiguration.authHandler) {
-                    const authResult = this.restApiConfiguration.authHandler.handle(this.restApiConfiguration, route.controller, context);
-                    if (!authResult) {
-                        return;
-                    }
-                }
-
-                if (this.restApiConfiguration.modelValidationHandler) {
-                    const modelValidationHandlerResult = this.restApiConfiguration.modelValidationHandler.validate(context);
-                    if (!modelValidationHandlerResult) {
-                        return;
-                    }
-                    return;
-                }
-                // const instance = new route.controller();
-                // const url = urlParts.slice(1).join("/");
-
-                // const routeDescriptors: RouteDescriptor[] = Reflect.getMetadata("routes", instance);
-                // if (routeDescriptors) {
-                //     const routeDescriptor = routeDescriptors.find(routeDescriptor => routeDescriptor.route === url);
-
-                //     if (routeDescriptor && routeDescriptor.descriptor) {
-                //         const constructorParameterTypes: any[] = Reflect.getMetadata("design:paramtypes", routeDescriptor.descriptor.value);
-                //         console.log("constructorParameterTypes", Reflect.getMetadataKeys(routeDescriptor.descriptor.value));
-                //         // const formatMetadataKey = Symbol("Required");
-
-                //         // console.log("ssd", Reflect.getMetadata(formatMetadataKey, instance, "productName"));
-
-                //         this.dependencyInjection = new DependencyInjection(route.controller, instance, req, res);
-                //         const method = routeDescriptor.descriptor.value;
-                //         method.apply(instance);
-                //         return;
-                //     }
-                // }
             }
-            console.log("not found");
-            new NotFoundException(context);
+
+            const routeDescriptor = ApiMethodMapper(context);
+
+            if (this.restApiConfiguration.getAuthHandler()) {
+                const authResult = this.restApiConfiguration.getAuthHandler().handle(context);
+                if (!authResult) {
+                    throw new UnAuthenticateException(context);
+                }
+            }
+
+            if (this.restApiConfiguration.getModelValidationHandler()) {
+                const modelValidationHandlerResult = this.restApiConfiguration.getModelValidationHandler().validate(context, routeDescriptor);
+                if (modelValidationHandlerResult.length) {
+                    throw new BadRequestException(context, modelValidationHandlerResult);
+                }
+            }
+
+            // Resolve Dependency of Controller
+            new DependencyInjection(context);
+            const args = Reflect.getMetadata(Constants.metadata.args, context.controllerObject) as any[];
+            const method = routeDescriptor.descriptor.value;
+            const data = method.apply(context.controllerObject as Object, args);
+            if (!(data instanceof ServerResponse)) {
+                context.response.json(data);
+            }
             return;
-        } catch (e) {
-            if (this.restApiConfiguration.exceptionHandler) {
-                this.restApiConfiguration.exceptionHandler.handleException(context, e);
+    } catch (e) {
+            if (this.restApiConfiguration.getExceptionHandler() && !context.response.headersSent) {
+                this.restApiConfiguration.getExceptionHandler().handleException(context, e);
             }
         }
     }
 
-    private getUrlParts(url: string) {
-        url = url.substring(url.indexOf("api") + 3);
-        url = url.startsWith("/") ? url.substring(1) : url;
-        return url ? url.split("/") : [];
-    }
-
-    private getContext(req: Request, res: Response) {
-        const httpContext: HttpContext = {
-            isAuthenticated: false,
-            request: req,
-            response: res
-        };
-        return httpContext;
-    }
 }

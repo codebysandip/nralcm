@@ -1,11 +1,11 @@
 {
-  "name": "nodelearning",
-  "version": "1.0.0",
-  "description": "",
+  "name": "nrlcm",
+  "version": "0.0.1-alpha",
+  "description": "This is a framework based on NodeJs to manage request lifecycle",
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon",
+    "start": "nodemon --watch dist ./dist/index.js",
     "lint": "npm run tslint \"src/**/*.ts\"",
     "tslint": "tslint"
   },
@@ -17,6 +17,7 @@
     "express": "^4.16.2",
     "nodemon": "^1.15.1",
     "reflect-metadata": "^0.1.12",
+    "ts-node": "^5.0.1",
     "tslint": "^5.9.1",
     "typescript": "^2.7.2"
   }
