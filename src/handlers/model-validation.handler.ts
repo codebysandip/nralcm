@@ -1,11 +1,7 @@
 import { IModelValidation } from "../infrastructure/IModelValidation";
-import { DependencyInjection } from "../infrastructure/dependency-injection";
 import { RouteDescriptor } from "../infrastructure/route-descriptor";
 import { HttpContext } from "../infrastructure/http-context";
-import { ApiMethodMapper } from "../infrastructure/api-method-mapper";
 import { Constants } from "../infrastructure/rest-api-constants";
-import { BadRequestException } from "../exceptions/bad-request.exception";
-import { ServerResponse } from "http";
 import { getMethodParameters } from "../common/get-method-parameters";
 import { ValidatorData } from "../validators/validator-data";
 import { ParamData } from "../common/model/param-data";
