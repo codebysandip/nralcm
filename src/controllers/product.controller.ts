@@ -3,7 +3,6 @@ import { ProductRepository } from "../repository/product.repository";
 import { Product } from "../models/product";
 import { BaseController } from "../infrastructure/base-controller";
 import { Route } from "../decorators/route.decorator";
-import { Controller } from "../decorators/controller.decorator";
 import { Optional } from "../validators/optional.validator";
 import { HttpMethod } from "../infrastructure/http-method.enum";
 
@@ -14,9 +13,9 @@ export class ProductController extends BaseController {
     }
 
     @Route("getAllProduct", HttpMethod.GET)
-    public getAllProducts(product: Product, id: string[], b: boolean, s: string, a: any, @Optional("object") o: Object) {
+    public getAllProducts(id: string, b: boolean, s: string, a: number, @Optional("object") o: number) {
         const data = this.productRepository.getAllProducts();
-        return data;
+        return { data: data, id: id, b: b, s: s, a: a, o: o};
     }
 
     @Route("/{id}/getProduct/{sd}", HttpMethod.GET)
@@ -26,7 +25,12 @@ export class ProductController extends BaseController {
 
     @Route("getProductDetails", HttpMethod.GET)
     public getProductDetails(queryString: boolean, @Optional() optional: string) {
-        return { data: queryString };
+        return { data: queryString, optional: optional };
+    }
+
+    @Route("saveproduct", HttpMethod.POST)
+    public saveProduct(product: Product, id: string) {
+        return this.response.send({ data: product, id: id });
     }
 }
 

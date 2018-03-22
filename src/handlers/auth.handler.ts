@@ -1,30 +1,32 @@
 import { IAuthHandler } from "../infrastructure/IAuthHandler";
 import "reflect-metadata/Reflect";
-import { HttpContext } from "../infrastructure/http-request";
-import { RestApiConfiguration } from "../infrastructure/rest-api.configuration";
+import { HttpContext } from "../infrastructure/http-context";
 import { UnAuthenticateException } from "../exceptions/unauthenticate.exception";
 import { UnAuthorizeException } from "../exceptions/unauthorize.exception";
+import { RestApiConfiguration } from "../infrastructure/rest-api.configuration";
 
+/**
+ * Auth Handler to process authentication
+ * and authorization
+ */
 export class AuthHandler implements IAuthHandler {
+    private restApiConfiguration = RestApiConfiguration.getInstance();
 
-    public handle(restApiConfiguration: RestApiConfiguration, target: any, context: HttpContext): boolean {
-        const authorize = Reflect.getMetadata("authorize", target);
-        if (authorize && restApiConfiguration.authenticationFilter) {
-            const authResult = restApiConfiguration.authenticationFilter.authenticate(context);
-            if (typeof authResult === "boolean" && !authResult) {
+    public handle(context: HttpContext): boolean {
+        const authorize = Reflect.getMetadata("authorize", context.controller);
+        if (authorize && this.restApiConfiguration.getAuthenticationFilter()) {
+            const authResult = this.restApiConfiguration.getAuthenticationFilter().authenticate(context);
+            if (!authResult) {
                 if (!context.response.headersSent) {
-                    new UnAuthenticateException(context);
+                    throw new UnAuthenticateException(context);
                 }
-                return false;
-            } else if (authResult instanceof UnAuthenticateException) {
-                return false;
-            }
-
-            if (authorize.roles && authorize.roles.length > 0 && restApiConfiguration.authorizeFilter) {
-                const isAuthorized = restApiConfiguration.authorizeFilter.authorize(context, authorize.roles);
-                if (!isAuthorized) {
-                    new UnAuthorizeException(context);
-                    return false;
+            } else {
+                context.isAuthenticated = true;
+                if (authorize.roles && authorize.roles.length > 0 && this.restApiConfiguration.getAuthorizeFilter()) {
+                    const isAuthorized = this.restApiConfiguration.getAuthorizeFilter().authorize(context, authorize.roles);
+                    if (!isAuthorized) {
+                        throw new UnAuthorizeException(context);
+                    }
                 }
             }
         }
