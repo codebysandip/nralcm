@@ -1,11 +1,12 @@
 import { Request, Response } from "express-serve-static-core";
+import { AuthPrinciple } from "./AuthPrinciple";
 
 export class HttpContext {
     public readonly request: Request;
     public readonly response: Response;
-    public isAuthenticated: boolean = false;
     public controller: any;
     public controllerObject: any;
+    public user: AuthPrinciple;
 
     constructor(req: Request, res: Response) {
         this.request = req;

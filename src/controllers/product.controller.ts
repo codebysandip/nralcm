@@ -5,8 +5,10 @@ import { BaseController } from "../infrastructure/base-controller";
 import { Route } from "../decorators/route.decorator";
 import { Optional } from "../validators/optional.validator";
 import { HttpMethod } from "../infrastructure/http-method.enum";
+import { FilterDecorator } from "../decorators/filter.decorator";
+import { TestFilter } from "../filters/test.filter";
 
-@Authorize(["admin"])
+@Authorize(["Manager"])
 export class ProductController extends BaseController {
     constructor(private productRepository: ProductRepository) {
         super();
@@ -29,8 +31,8 @@ export class ProductController extends BaseController {
     }
 
     @Route("saveproduct", HttpMethod.POST)
+    @FilterDecorator(new TestFilter())
     public saveProduct(product: Product, id: string) {
-        return this.response.send({ data: product, id: id });
+        return { data: product, id: id };
     }
 }
-
