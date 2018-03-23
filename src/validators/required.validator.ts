@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { ValidatorData } from "./validator-data";
 import { isValidType } from "../common/check-valid-type";
+import { ModelError } from "../common/model/model-error";
 
 export function Required(displayName?: string, message?: string) {
     return function(target: any, key: string) {
@@ -27,19 +28,39 @@ export function Required(displayName?: string, message?: string) {
  * @param type instance of class
  * @returns true or error message
  */
-export function RequiredValidate(value: any, validatorData: ValidatorData, type: any): true|string {
+export function RequiredValidate(value: any, validatorData: ValidatorData, type: any): ModelError|true {
     if (value.toString()) {
         const typeOfValue = Reflect.getMetadata("design:type", type, validatorData.propertyKey) as Function;
         if (!isValidType(typeOfValue, value)) {
-            return `Parameter ${validatorData.propertyKey} of type ${typeOfValue.name} is not valid value '${value}'`;
+            const modelError: ModelError = {
+                propertyName: validatorData.propertyKey,
+                errorMessage: `Parameter ${validatorData.propertyKey} is not valid value '${value} for type ${typeOfValue.name}'`,
+                isTypeError: true,
+                typeOfProperty: typeOfValue,
+                errorType: "RequestBody"
+            };
+            return modelError;
         }
         return true;
     } else {
         if (validatorData.message) {
-            return validatorData.message;
+            const modelError: ModelError = {
+                propertyName: validatorData.propertyKey,
+                errorMessage: validatorData.message,
+                isTypeError: false,
+                typeOfProperty: Reflect.getMetadata("design:type", type, validatorData.propertyKey) as Function,
+                errorType: "RequestBody"
+            };
+            return modelError;
         } else {
-            const errorMessage = `${validatorData.displayName || validatorData.propertyKey} is required`;
-            return errorMessage;
+            const modelError: ModelError = {
+                propertyName: validatorData.propertyKey,
+                errorMessage: `${validatorData.displayName || validatorData.propertyKey} is required`,
+                isTypeError: false,
+                typeOfProperty: Reflect.getMetadata("design:type", type, validatorData.propertyKey) as Function,
+                errorType: "RequestBody"
+            };
+            return modelError;
         }
     }
 }

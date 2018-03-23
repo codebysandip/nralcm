@@ -20,7 +20,7 @@ export class DependencyInjection {
                     this.circularInjection(val, this.context.controllerObject[constructorParameters[index]]);
             });
             this.context.controllerObject["request"] = this.context.request;
-            this.context.controllerObject["response"] = new HttpResponse(RestApiConfiguration.getInstance().getHttpResponseHandler(),
+            this.context.controllerObject["response"] = new HttpResponse(RestApiConfiguration.getInstance().HttpResponseHandler,
                                                                 this.context);
         }
     }

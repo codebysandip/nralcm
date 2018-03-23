@@ -5,17 +5,20 @@ import { IAuthHandler } from "../infrastructure/IAuthHandler";
 import { IHttpResponseHandler } from "./IHttpResponseHandler";
 import { IModelValidation } from "./IModelValidation";
 import { AuthHandler } from "../handlers/auth.handler";
-
+import { IFilter } from "./IFilter";
+import { IHttpRequestHandler } from "./IHttpRequest.handler";
 /**
  * Configuration class for Rest api
  */
 export class RestApiConfiguration {
-    private authenticationFilter: IAuthentication;
-    private authorizeFilter: IAuthorize;
-    private exceptionHandler: IExceptionHandler;
-    private authHandler: IAuthHandler = new AuthHandler();
-    private modelValidationHandler: IModelValidation;
-    private httpResponseHandler: IHttpResponseHandler;
+    private _authenticationFilter: IAuthentication;
+    private _authorizeFilter: IAuthorize;
+    private _exceptionHandler: IExceptionHandler;
+    private _authHandler: IAuthHandler = new AuthHandler();
+    private _modelValidationHandler: IModelValidation;
+    private _httpResponseHandler: IHttpResponseHandler;
+    private _filters: IFilter[] = [];
+    private _httpRrequestHandler: IHttpRequestHandler;
     // public filters: IRestApiFilter[];
 
     private static config: RestApiConfiguration;
@@ -31,47 +34,63 @@ export class RestApiConfiguration {
         return this.config;
     }
 
-    public setAuthenticationFilter(filter: IAuthentication) {
-        this.authenticationFilter = filter;
+    set AuthenticationFilter(filter: IAuthentication) {
+        this._authenticationFilter = filter;
     }
 
-    public getAuthenticationFilter() {
-        return this.authenticationFilter;
+    get AuthenticationFilter() {
+        return this._authenticationFilter;
     }
 
-    public setAuthorizeFilter(filter: IAuthorize) {
-        this.authorizeFilter = filter;
+    set AuthorizeFilter(filter: IAuthorize) {
+        this._authorizeFilter = filter;
     }
 
-    public getAuthorizeFilter() {
-        return this.authorizeFilter;
+    get AuthorizeFilter() {
+        return this._authorizeFilter;
     }
 
-    public setExceptionHandler(handler: IExceptionHandler) {
-        this.exceptionHandler = handler;
+    set ExceptionHandler(handler: IExceptionHandler) {
+        this._exceptionHandler = handler;
     }
 
-    public getExceptionHandler() {
-        return this.exceptionHandler;
+    get ExceptionHandler() {
+        return this._exceptionHandler;
     }
 
-    public getAuthHandler() {
-        return this.authHandler;
+    get AuthHandler() {
+        return this._authHandler;
     }
 
-    public setModelValidationHandler(handler: IModelValidation) {
-        this.modelValidationHandler = handler;
+    set ModelValidationHandler(handler: IModelValidation) {
+        this._modelValidationHandler = handler;
     }
 
-    public getModelValidationHandler() {
-        return this.modelValidationHandler;
+    get ModelValidationHandler() {
+        return this._modelValidationHandler;
     }
 
-    public setHttpResponseHandler(handler: IHttpResponseHandler) {
-        this.httpResponseHandler = handler;
+    set HttpResponseHandler(handler: IHttpResponseHandler) {
+        this._httpResponseHandler = handler;
     }
 
-    public getHttpResponseHandler() {
-        return this.httpResponseHandler;
+    get HttpResponseHandler() {
+        return this._httpResponseHandler;
+    }
+
+    get Filters() {
+        return this._filters;
+    }
+
+    public addFilter (filter: IFilter) {
+        this._filters.push(filter);
+    }
+
+    get HttpRequestHandler() {
+        return this._httpRrequestHandler;
+    }
+
+    set HttpRequestHandler(httpRequestHandler: IHttpRequestHandler) {
+        this._httpRrequestHandler = httpRequestHandler;
     }
 }

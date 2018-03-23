@@ -9,7 +9,7 @@ export function Optional(displayName?: string, message?: string) {
             validator: "Optional",
             displayName: displayName,
             message: message,
-            validate: validate,
+            validate: undefined,
             parameterIndex: parameterIndex
         };
         // console.log("target", target, parameterIndex, propertyKey);
@@ -19,6 +19,3 @@ export function Optional(displayName?: string, message?: string) {
     };
 }
 
-function validate(value: any, validatorData: ValidatorData, type: any): true|string {
-    return true;
-}

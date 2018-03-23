@@ -1,8 +1,8 @@
-import { HttpContext } from "../infrastructure/http-context";
+// import { HttpContext } from "../infrastructure/http-context";
 
-namespace nrlcm {
-    class HandlerNotFoundException {
-        constructor(context: HttpContext) {
-        }
-    }
-}
+// namespace nrlcm {
+//     class HandlerNotFoundException {
+//         constructor(context: HttpContext) {
+//         }
+//     }
+// }
