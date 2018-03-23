@@ -25,7 +25,7 @@ export class AuthHandler implements IAuthHandler {
                 if (authorize.roles && authorize.roles.length > 0 && this.restApiConfiguration.AuthorizeFilter) {
                     if (context.user && context.user.isAuthenticated) {
                         const isAuthorized = this.restApiConfiguration.AuthorizeFilter.authorize(context, authorize.roles);
-                        if (!isAuthorized) {
+                        if (!isAuthorized && !context.response.headersSent) {
                             throw new UnAuthorizeException(context);
                         }
                     } else {

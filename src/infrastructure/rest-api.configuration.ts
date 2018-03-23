@@ -6,6 +6,7 @@ import { IHttpResponseHandler } from "./IHttpResponseHandler";
 import { IModelValidation } from "./IModelValidation";
 import { AuthHandler } from "../handlers/auth.handler";
 import { IFilter } from "./IFilter";
+import { IHttpRequestHandler } from "./IHttpRequest.handler";
 /**
  * Configuration class for Rest api
  */
@@ -17,6 +18,7 @@ export class RestApiConfiguration {
     private _modelValidationHandler: IModelValidation;
     private _httpResponseHandler: IHttpResponseHandler;
     private _filters: IFilter[] = [];
+    private _httpRrequestHandler: IHttpRequestHandler;
     // public filters: IRestApiFilter[];
 
     private static config: RestApiConfiguration;
@@ -82,5 +84,13 @@ export class RestApiConfiguration {
 
     public addFilter (filter: IFilter) {
         this._filters.push(filter);
+    }
+
+    get HttpRequestHandler() {
+        return this._httpRrequestHandler;
+    }
+
+    set HttpRequestHandler(httpRequestHandler: IHttpRequestHandler) {
+        this._httpRrequestHandler = httpRequestHandler;
     }
 }

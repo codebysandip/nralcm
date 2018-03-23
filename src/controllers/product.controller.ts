@@ -36,4 +36,3 @@ export class ProductController extends BaseController {
         return { data: product, id: id };
     }
 }
-

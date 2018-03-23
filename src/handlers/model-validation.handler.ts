@@ -8,6 +8,7 @@ import { ParamData } from "../common/model/param-data";
 import { QueryString } from "../infrastructure/query-string";
 import { isValidType } from "../common/check-valid-type";
 import { HttpMethod } from "../infrastructure/http-method.enum";
+import { ModelError } from "../common/model/model-error";
 
 export class ModelValidationHandler implements IModelValidation {
 
@@ -15,27 +16,16 @@ export class ModelValidationHandler implements IModelValidation {
      * Validates params, query string and request body
      * @param context HttpContext Object
      * @param routeDescriptor RouteDescriptor Object
-     * @returns Array of error message
+     * @returns Array of ModelError
      */
-    public validate(context: HttpContext, routeDescriptor: RouteDescriptor): string[] {
-        const errorMessages = this.validateParamsAndQueryWithMethodParameters(context, routeDescriptor);
-        const existingErrorMessages = Reflect.getMetadata(Constants.metadata.errorMessages, context.controllerObject) as string[] || [];
+    public validate(context: HttpContext, routeDescriptor: RouteDescriptor): ModelError[] {
+        const modelErrorArray = this.validateParamsAndQueryWithMethodParameters(context, routeDescriptor);
+        const existingmodelErrorArray = Reflect.getMetadata(Constants.metadata.errorMessages, context.controllerObject) as ModelError[] || [];
 
-        return [...errorMessages, ...existingErrorMessages];
-
-        // if (routeDescriptor && routeDescriptor.descriptor) {
-        //     new DependencyInjection(context);
-        //     const args = Reflect.getMetadata(Constants.metadata.args, context.controllerObject) as any[];
-        //     const method = routeDescriptor.descriptor.value;
-        //     const data = method.apply(context.controllerObject as Object, args);
-        //     if (!(data instanceof ServerResponse)) {
-        //         context.response.json(data);
-        //     }
-        //     return true;
-        // }
+        return [...modelErrorArray, ...existingmodelErrorArray];
     }
 
-    private validateParamsAndQueryWithMethodParameters(context: HttpContext, routeDescriptor: RouteDescriptor): string[] {
+    private validateParamsAndQueryWithMethodParameters(context: HttpContext, routeDescriptor: RouteDescriptor): ModelError[] {
         const methodParameterTypes = Reflect.getMetadata("design:paramtypes", context.controllerObject,
             routeDescriptor.propertyKey) as Function[];
         const methodParameters = getMethodParameters(context.controller, routeDescriptor.propertyKey);
@@ -50,7 +40,7 @@ export class ModelValidationHandler implements IModelValidation {
             optionalParameters = validationMetaData.filter(m => m.validator === "Optional");
         }
 
-        let errorMessages: string[] = [];
+        let modelErrorArray: ModelError[] = [];
         const args = new Array(methodParameters.length);
         methodParameters.forEach((par, index) => {
             let isFound = false;
@@ -59,7 +49,14 @@ export class ModelValidationHandler implements IModelValidation {
             if (param) {
                 isFound = true;
                 if (!isValidType(methodParameterTypes[index], param.paramValue)) {
-                    errorMessages.push(`Param ${param.paramName} of type ${methodParameterTypes[index].name} is not valid`);
+                    const modelError: ModelError = {
+                        propertyName: param.paramName,
+                        errorMessage: `Param ${param.paramName} of type ${methodParameterTypes[index].name} is not valid`,
+                        isTypeError: true,
+                        typeOfProperty: methodParameterTypes[index],
+                        errorType: "Param"
+                    };
+                    modelErrorArray.push(modelError);
                 } else {
                     args[index] = param.paramValue;
                 }
@@ -68,7 +65,14 @@ export class ModelValidationHandler implements IModelValidation {
                 if (queryString) {
                     isFound = true;
                     if (!isValidType(methodParameterTypes[index], queryString.value)) {
-                        errorMessages.push(`Parameter ${queryString.name} of type ${methodParameterTypes[index].name} is not valid`);
+                        const modelError: ModelError = {
+                            propertyName: queryString.name,
+                            errorMessage: `Parameter ${queryString.name} of type ${methodParameterTypes[index].name} is not valid`,
+                            isTypeError: true,
+                            typeOfProperty: methodParameterTypes[index],
+                            errorType: "QueryString"
+                        };
+                        modelErrorArray.push(modelError);
                     } else {
                         args[index] = queryString.value;
                     }
@@ -81,31 +85,45 @@ export class ModelValidationHandler implements IModelValidation {
             }
             if (!isFound) {
                 if (routeDescriptor.httpMethod === HttpMethod.GET) {
-                    errorMessages.push(`Parameter ${par} is missing in request`);
+                    const modelError: ModelError = {
+                        propertyName: par,
+                        errorMessage: `Parameter ${par} is missing in request`,
+                        isTypeError: false,
+                        typeOfProperty: undefined,
+                        errorType: "Param"
+                    };
+                    modelErrorArray.push(modelError);
                 } else {
                     if (methodParameterTypes[index].name === "Number" || methodParameterTypes[index].name === "String"
                         || methodParameterTypes[index].name === "Boolean") {
-                        errorMessages.push(`Parameter ${par} is missing in request`);
-                    } else {
+                            const modelError: ModelError = {
+                                propertyName: par,
+                                errorMessage: `Parameter ${par} is missing in request`,
+                                isTypeError: false,
+                                typeOfProperty: undefined,
+                                errorType: "Param"
+                            };
+                            modelErrorArray.push(modelError);
+                        } else {
                         if (methodParameterTypes[index].name !== "Object") {
                             const result = this.validateRequestBody(context, methodParameterTypes[index]);
-                            errorMessages = [...errorMessages, ...result];
+                            modelErrorArray = [...modelErrorArray, ...result];
                         }
                         args[index] = context.request.body;
                     }
                 }
             }
         });
-        if (errorMessages.length === 0) {
+        if (modelErrorArray.length === 0) {
             Reflect.defineMetadata(Constants.metadata.args, args, context.controllerObject);
         }
-        return errorMessages;
+        return modelErrorArray;
     }
 
-    private validateRequestBody(context: HttpContext, paramtype: any): string[] {
+    private validateRequestBody(context: HttpContext, paramtype: any): ModelError[] {
         const instance = new paramtype();
         const validatorDataArr = Reflect.getMetadata(Constants.metadata.validation, instance) as ValidatorData[];
-        const errorMessages: string[] = [];
+        const modelErrorArray: ModelError[] = [];
 
         if (validatorDataArr && validatorDataArr.length) {
             const objectKeys = Object.keys(context.request.body);
@@ -115,12 +133,12 @@ export class ModelValidationHandler implements IModelValidation {
                 if (validatorData.validate) {
                     const validationResult = validatorData.validate(keyIndex !== -1 ? context.request.body[objectKeys[keyIndex]] : undefined,
                         validatorData, instance);
-                    if (typeof validationResult === "string" && validationResult) {
-                        errorMessages.push(validationResult);
+                    if (typeof validationResult !== "boolean" && validationResult) {
+                        modelErrorArray.push(validationResult);
                     }
                 }
             });
         }
-        return errorMessages;
+        return modelErrorArray;
     }
 }

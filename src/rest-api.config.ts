@@ -6,6 +6,7 @@ import { ModelValidationHandler } from "./handlers/model-validation.handler";
 import { HttpResponseHandler } from "./handlers/http-response.handler";
 import { TestFilter } from "./filters/test.filter";
 import { Test1Filter } from "./filters/test1.filter";
+// import { HttpRequestHandler } from "./handlers/http-request.handler";
 
 /**
  * Rest Api Configuration class to register
@@ -20,5 +21,6 @@ export class RestApiConfig {
         config.HttpResponseHandler = new HttpResponseHandler();
         config.addFilter(new TestFilter());
         config.addFilter(new Test1Filter());
+        // config.HttpRequestHandler = new HttpRequestHandler();
     }
 }

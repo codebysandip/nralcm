@@ -1,3 +1,4 @@
+import { ModelError } from "../common/model/model-error";
 
 export interface ValidatorData {
     propertyKey: string;
@@ -18,5 +19,5 @@ export interface ValidatorData {
  * @returns true or error message
  */
 export interface ValidateFunction {
-    (value: any, validatorData: ValidatorData, type: any): true|string;
+    (value: any, validatorData: ValidatorData, type: any): true|ModelError;
 }
