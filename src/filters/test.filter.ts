@@ -4,10 +4,10 @@ import { RouteDescriptor } from "../infrastructure/route-descriptor";
 
 export class TestFilter implements IFilter {
     public beforeActionExceduted(httpContext: HttpContext, routeDescriptor: RouteDescriptor): void {
-        console.log("beforeActionExceduted", httpContext.user, routeDescriptor);
+        console.log("beforeActionExceduted TestFilter", httpContext.user, routeDescriptor);
     }
 
     public aftereActionExceduted(httpContext: HttpContext, routeDescriptor: RouteDescriptor): void {
-        console.log("aftereActionExceduted", httpContext.user, routeDescriptor);
+        console.log("aftereActionExceduted TestFilter", httpContext.user, routeDescriptor);
     }
 }

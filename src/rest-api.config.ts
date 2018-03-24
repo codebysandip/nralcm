@@ -4,8 +4,7 @@ import { AuthorizationFilter } from "./filters/authorize.filter";
 import { ExceptionHandler } from "./handlers/exception.handler";
 import { ModelValidationHandler } from "./handlers/model-validation.handler";
 import { HttpResponseHandler } from "./handlers/http-response.handler";
-import { TestFilter } from "./filters/test.filter";
-import { Test1Filter } from "./filters/test1.filter";
+import { GlobalFilter } from "./filters/global.filter";
 // import { HttpRequestHandler } from "./handlers/http-request.handler";
 
 /**
@@ -19,8 +18,7 @@ export class RestApiConfig {
         config.ExceptionHandler = new ExceptionHandler();
         config.ModelValidationHandler = new ModelValidationHandler();
         config.HttpResponseHandler = new HttpResponseHandler();
-        config.addFilter(new TestFilter());
-        config.addFilter(new Test1Filter());
+        config.addFilter(new GlobalFilter());
         // config.HttpRequestHandler = new HttpRequestHandler();
     }
 }

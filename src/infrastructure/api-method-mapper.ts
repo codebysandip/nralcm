@@ -3,8 +3,8 @@ import "reflect-metadata";
 import { Constants } from "../infrastructure/rest-api-constants";
 import { QueryString } from "../infrastructure/query-string";
 import { HttpContext } from "./http-context";
-import { NotFoundException } from "../exceptions/not-found.exception";
 import { ParamData } from "../common/model/param-data";
+import { nrlcm } from "./exception";
 
 /**
  * Maps current request with api method of controller
@@ -14,10 +14,11 @@ import { ParamData } from "../common/model/param-data";
 export function ApiMethodMapper(context: HttpContext): RouteDescriptor {
     const urlParts = getUrlParts(context.request.url);
     const url = urlParts.slice(1).join("/");
-
+    console.log("httpMethod", context.request.method);
     // try to find route without param
-    const routeDescriptors: RouteDescriptor[] = Reflect.getMetadata("routes", context.controllerObject as Object);
-    const routeDescriptor = routeDescriptors.find(routeDescriptor => routeDescriptor.route === url);
+    const routeDescriptors: RouteDescriptor[] = Reflect.getMetadata("routes", context.controllerObject);
+    const routeDescriptor = routeDescriptors.find(routeDescriptor => context.request.method === routeDescriptor.httpMethod
+                                && (!url ? (routeDescriptor.propertyKey.toUpperCase() === context.request.method) : routeDescriptor.route === url));
     if (routeDescriptor) {
         mapQueryString(context, routeDescriptor);
         return routeDescriptor;
@@ -28,7 +29,7 @@ export function ApiMethodMapper(context: HttpContext): RouteDescriptor {
         mapQueryString(context, paramMapResult);
         return paramMapResult;
     }
-    throw new NotFoundException(context);
+    throw new nrlcm.Exception.NotFoundException(context);
 }
 
 /**
@@ -54,9 +55,15 @@ function getUrlParts(url: string): string[] {
  */
 function mapParams(context: HttpContext, routeDescriptors: RouteDescriptor[], url: string): RouteDescriptor {
     for (let index = 0; index < routeDescriptors.length; index++) {
-        const routeParts = routeDescriptors[index].route.startsWith("/") ? routeDescriptors[index].route.substring(1).split("/") : routeDescriptors[index].route.split("/");
+        const routeDescriptor = routeDescriptors[index];
+        routeDescriptor.route = routeDescriptor.route || "/";
+        const routeParts: string[] = routeDescriptor.route.startsWith("/") ?
+                                routeDescriptor.route.substring(1).split("/") : routeDescriptor.route.split("/");
+
         const urlParts = url.startsWith("/") ? url.substring(1).split("/") : url.split("/");
-        if (routeParts.length === urlParts.length && routeDescriptors[index].route.indexOf("{") >= 0 && routeDescriptors[index].route.indexOf("}") >= 0) {
+        console.log("urlparts", routeParts, urlParts);
+
+        if (routeParts.length === urlParts.length && routeDescriptor.route.indexOf("{") >= 0 && routeDescriptor.route.indexOf("}") >= 0) {
             const nonParamsRouteParts = routeParts.filter(route => route.indexOf("{") === -1 || route.indexOf("}") === -1);
             let isMatched = false;
             nonParamsRouteParts.forEach((routePart) => {
@@ -66,7 +73,9 @@ function mapParams(context: HttpContext, routeDescriptors: RouteDescriptor[], ur
                     isMatched = false;
                 }
             });
-            if (isMatched) {
+
+            if (isMatched || nonParamsRouteParts.length === 0) {
+                isMatched = true;
                 routeParts.forEach((route, i) => {
                     const openCurlyBraceIndex = route.indexOf("{");
                     const closeCurlyBraceIndex = route.indexOf("}");
@@ -93,7 +102,7 @@ function mapParams(context: HttpContext, routeDescriptors: RouteDescriptor[], ur
         }
     }
     // tslint:disable-next-line:no-null-keyword
-    throw new NotFoundException(context);
+    throw new nrlcm.Exception.NotFoundException(context);
 }
 
 /**

@@ -8,31 +8,37 @@ import { HttpMethod } from "../infrastructure/http-method.enum";
 import { FilterDecorator } from "../decorators/filter.decorator";
 import { TestFilter } from "../filters/test.filter";
 
-@Authorize(["Manager"])
+// @Authorize(["Manager"])
 export class ProductController extends BaseController {
     constructor(private productRepository: ProductRepository) {
         super();
     }
 
-    @Route("getAllProduct", HttpMethod.GET)
-    public getAllProducts(id: string, b: boolean, s: string, a: number, @Optional("object") o: number) {
+    @Route(HttpMethod.GET)
+    public get(id: string, b: boolean, s: string, a: number, @Optional("object") o: number) {
         const data = this.productRepository.getAllProducts();
         return { data: data, id: id, b: b, s: s, a: a, o: o};
     }
 
-    @Route("/{id}/getProduct/{sd}", HttpMethod.GET)
+    @Route(HttpMethod.GET, "/{id}/getProduct/{sd}")
     public getProduct(id: number, sd: number, abc: string) {
         return { id: id, name: "samsung", sd: sd, abc: abc };
     }
 
-    @Route("getProductDetails", HttpMethod.GET)
+    @Route(HttpMethod.GET, "{id}")
+    public getProductById(id: number) {
+        return { id: id, name: "samsung" };
+    }
+
+    @Authorize(["Manager"])
+    @Route(HttpMethod.GET, "getProductDetails")
     public getProductDetails(queryString: boolean, @Optional() optional: string) {
         return { data: queryString, optional: optional };
     }
 
-    @Route("saveproduct", HttpMethod.POST)
+    @Route(HttpMethod.POST)
     @FilterDecorator(new TestFilter())
-    public saveProduct(product: Product, id: string) {
+    public post(product: Product, id: string) {
         return { data: product, id: id };
     }
 }

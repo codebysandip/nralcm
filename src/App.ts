@@ -3,7 +3,7 @@ import { HandlerDispatcher } from "./infrastructure/HandlerDispatcher";
 import * as bodyparser from "body-parser";
 import { Request, Response } from "express-serve-static-core";
 import { getContext } from "./common/get-context";
-import { SyntaxErrorException } from "./exceptions/syntax-error.exception";
+import { nrlcm } from "./infrastructure/exception";
 import { HttpConfig } from "./http-config";
 import { HttpConfiguration } from "./infrastructure/http-configuration";
 
@@ -18,12 +18,11 @@ class App {
         this.express.use(bodyparser.json());
         this.httpConfig.register(this.httpConfiguration);
 
-        this.express.use((err: any, req: Request, res: Response, next: any): void => {
+        this.express.use((err: any, req: Request, res: Response, next: any): void|nrlcm.Exception.SyntaxErrorException => {
             if (err) {
                 if (err instanceof SyntaxError) {
                     // console.log("syntax err");
-                    new SyntaxErrorException(getContext(req, res));
-                    return;
+                    return new nrlcm.Exception.SyntaxErrorException(getContext(req, res));
                 }
                 console.log(err);
                 return;
