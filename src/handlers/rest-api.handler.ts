@@ -8,12 +8,11 @@ import { Request, Response } from "express-serve-static-core";
 import { ControllerMapper } from "../infrastructure/controller-mapper";
 import { IRoute } from "../infrastructure/route";
 import { ApiMethodMapper } from "../infrastructure/api-method-mapper";
-import { UnAuthenticateException } from "../exceptions/unauthenticate.exception";
-import { BadRequestException } from "../exceptions/bad-request.exception";
 import { DependencyInjection } from "../infrastructure/dependency-injection";
 import { Constants } from "../infrastructure/rest-api-constants";
 import { ServerResponse } from "http";
 import { FilterExecuter } from "../infrastructure/filter-executer";
+import { nrlcm } from "../infrastructure/exception";
 
 /**
  * Handler for rest api
@@ -55,12 +54,13 @@ export class RestApiHandler implements IHttpHandler {
 
             // Mapping request with api method
             const routeDescriptor = ApiMethodMapper(context);
+            context.routeDescriptor = routeDescriptor;
 
             // sending request to Auth handler
             if (this.restApiConfiguration.AuthHandler) {
                 const authResult = this.restApiConfiguration.AuthHandler.handle(context, this.restApiConfiguration);
                 if (!authResult) {
-                    throw new UnAuthenticateException(context);
+                    throw new nrlcm.Exception.UnAuthenticateException(context);
                 }
             }
 
@@ -68,7 +68,7 @@ export class RestApiHandler implements IHttpHandler {
             if (this.restApiConfiguration.ModelValidationHandler) {
                 const modelValidationHandlerResult = this.restApiConfiguration.ModelValidationHandler.validate(context, routeDescriptor);
                 if (modelValidationHandlerResult.length && !context.response.headersSent) {
-                    throw new BadRequestException(context, modelValidationHandlerResult);
+                    throw new nrlcm.Exception.BadRequestException(context, modelValidationHandlerResult);
                 }
             }
 

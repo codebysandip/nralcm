@@ -5,38 +5,36 @@ import { RouteDescriptor } from "./route-descriptor";
 import { IFilter } from "./IFilter";
 
 export class FilterExecuter {
-    private matchedFilters: IFilter[] = [];
     private usedFilters: IFilter[] = [];
+    private globalFilters: IFilter[] = [];
 
-    constructor (private restApiConfiguration: RestApiConfiguration, private context: HttpContext, private routeDescriptor: RouteDescriptor) {
-
+    constructor(private restApiConfiguration: RestApiConfiguration, private context: HttpContext, private routeDescriptor: RouteDescriptor) {
     }
 
     public executeBeforeActionExceduted() {
         this.usedFilters = Reflect.getMetadata(Constants.metadata.filter, this.context.controllerObject,
-                                        this.routeDescriptor.propertyKey) || [];
+            this.routeDescriptor.propertyKey) || [];
 
+        this.globalFilters = this.restApiConfiguration.Filters;
+
+        this.globalFilters.forEach(filter => {
+            filter.beforeActionExceduted(this.context, this.routeDescriptor);
+        });
         if (this.usedFilters.length) {
-            const registeredFilters = this.restApiConfiguration.Filters;
-
             this.usedFilters.forEach(filter => {
-                const matchedFilter = registeredFilters.find(f => f.constructor.name === filter.constructor.name);
-                if (matchedFilter) {
-                    this.matchedFilters.push(matchedFilter);
-                    matchedFilter.beforeActionExceduted(this.context, this.routeDescriptor);
-                }
+                filter.beforeActionExceduted(this.context, this.routeDescriptor);
             });
         }
     }
 
     public executeAfterActionExceduted() {
+        this.globalFilters.forEach(filter => {
+            filter.aftereActionExceduted(this.context, this.routeDescriptor);
+        });
 
         if (this.usedFilters.length) {
-            this.matchedFilters.forEach(matchedFilter => {
-                if (matchedFilter) {
-                    this.matchedFilters.push(matchedFilter);
-                    matchedFilter.aftereActionExceduted(this.context, this.routeDescriptor);
-                }
+            this.usedFilters.forEach(filter => {
+                filter.aftereActionExceduted(this.context, this.routeDescriptor);
             });
         }
     }
