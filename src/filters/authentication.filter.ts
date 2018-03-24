@@ -4,7 +4,7 @@ import * as jwt from "jsonwebtoken";
 import { Constants } from "../infrastructure/rest-api-constants";
 import { TokenData } from "../models/token-data";
 import { MyAuthPrinciple } from "../infrastructure/my-AuthPrinciple";
-import { TokenNotValidException } from "../exceptions/token-not-valid.exception";
+import { nrlcm } from "../infrastructure/exception";
 
 /**
  * Authentication for authentication of request
@@ -25,7 +25,7 @@ export class AuthenticationFilter implements IAuthentication {
                     const tokenData: TokenData = jwt.verify(tokenparts[1], Constants.secret) as TokenData;
                     context.user = new MyAuthPrinciple(tokenData.Email, tokenData.Role);
                 } catch {
-                    throw new TokenNotValidException(context);
+                    throw new nrlcm.Exception.TokenNotValidException(context);
                 }
                 return true;
             }

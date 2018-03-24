@@ -1,5 +1,6 @@
 export const Constants = {
     metadata: {
+        authorize: "authorize",
         emptyRouteParams: "emptyRouteParams",
         routeParams: "routeParams",
         queryString: "queryString",

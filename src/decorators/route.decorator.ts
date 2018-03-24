@@ -5,12 +5,12 @@ import { getMethodParameters } from "../common/get-method-parameters";
 
 /**
  * Route Decorator to define routes in controller
- * @param route route string for api method
  * @param httpMethod HttpMethod of api
+ * @param route route string for api method
  */
-export function Route(route: string, httpMethod: HttpMethod) {
+export function Route(httpMethod: HttpMethod, route?: string) {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-        if (route.indexOf("{") >= 0 && route.indexOf("}") >= 0) {
+        if (route && route.indexOf("{") >= 0 && route.indexOf("}") >= 0) {
             const routeParts = route.startsWith("/") ? route.substring(1).split("/") : route.split("/");
             const methodParameters = getMethodParameters(descriptor.value, propertyKey);
 
@@ -37,7 +37,7 @@ export function Route(route: string, httpMethod: HttpMethod) {
             }
         }
         const routeDescriptor: RouteDescriptor = {
-            route: route,
+            route: route || "",
             descriptor: descriptor,
             propertyKey: propertyKey,
             httpMethod: httpMethod
