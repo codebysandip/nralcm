@@ -2,18 +2,18 @@
     "compilerOptions": {
         "target": "es6",
         "module": "commonjs",
-        "outDir": "dist",
+        "outDir": "",
         "strictNullChecks": true,
         "noImplicitReturns": true,
         "noImplicitAny": true,
-        "sourceMap": true,
         "rootDir": "src",
         "watch": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "noEmitOnError": true,
         "noUnusedLocals": true,
-        "noUnusedParameters": true
+        "noUnusedParameters": true,
+        "declaration": true
     },
     "include": [
         "src/**/*.ts"
