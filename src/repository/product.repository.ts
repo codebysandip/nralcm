@@ -1,8 +1,9 @@
 import { SomeClass } from "./some.repository";
+// import { Repository } from "../decorators/repository.decorator";
 
+// @Repository()
 export class ProductRepository {
     constructor(private someClass: SomeClass) {
-
     }
 
     public getAllProducts() {

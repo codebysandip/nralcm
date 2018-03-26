@@ -77,7 +77,7 @@ export class RestApiHandler implements IHttpHandler {
             filterExecuter.executeBeforeActionExceduted();
 
             // Resolve Dependency of Controller
-            new DependencyInjection(context);
+            DependencyInjection.inject(context);
 
             // get arugments array to call api method
             const args = Reflect.getMetadata(Constants.metadata.args, context.controllerObject) as any[];

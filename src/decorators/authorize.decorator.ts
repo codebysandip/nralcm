@@ -6,10 +6,15 @@ import "reflect-metadata/Reflect";
 export function Authorize(roles?: string[]) {
     return function (target: any, propertyKey?: string, descriptor?: PropertyDescriptor) {
         if (propertyKey && descriptor) {
-            Reflect.defineMetadata("authorize", { roles: roles}, target, propertyKey);
+            Reflect.defineMetadata("authorize", { roles: roles }, target, propertyKey);
         } else {
-            Reflect.defineMetadata("authorize", { roles: roles}, target);
+            const targetString = target.toString() as string;
+            const baseControllerIndex = targetString.indexOf("BaseController");
+            if (baseControllerIndex > 0 && targetString.indexOf("BaseController") < targetString.indexOf("{")) {
+                Reflect.defineMetadata("authorize", { roles: roles }, target);
+            } else {
+                throw new Error(`${target.name} must extend with BaseController`);
+            }
         }
-        // console.log("target", target)
     };
 }

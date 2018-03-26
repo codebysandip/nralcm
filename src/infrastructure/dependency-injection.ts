@@ -7,11 +7,10 @@ import { RestApiConfiguration } from "./rest-api.configuration";
  * Resolves Dependency Of controller
  */
 export class DependencyInjection {
-    constructor(private context: HttpContext) {
-        this.inject();
-    }
+    private static context: HttpContext;
 
-    private inject() {
+    public static inject(context: HttpContext) {
+        this.context = context;
         const constructorParameterTypes: any[] = Reflect.getMetadata("design:paramtypes", this.context.controller);
         if (constructorParameterTypes && constructorParameterTypes.length > 0) {
             const constructorParameters = this.getConstructorParameters(this.context.controller);
@@ -25,19 +24,24 @@ export class DependencyInjection {
         }
     }
 
-    private circularInjection(target: any, source: any) {
+    private static circularInjection(target: any, source: any) {
         const constructorParameters = this.getConstructorParameters(target);
         if (constructorParameters && constructorParameters.length > 0) {
             const constructorParameterTypes: any[] = Reflect.getMetadata("design:paramtypes", target);
-            if (constructorParameterTypes && constructorParameterTypes.length > 0) {
-                constructorParameterTypes.forEach((val, index) => {
-                    source[constructorParameters[index]] = new val();
-                });
+
+            if (constructorParameterTypes && constructorParameterTypes.length === constructorParameters.length) {
+                if (constructorParameterTypes && constructorParameterTypes.length > 0) {
+                    constructorParameterTypes.forEach((val, index) => {
+                        source[constructorParameters[index]] = new val();
+                    });
+                }
+            } else {
+                throw new Error("Unable to resolve dependency. Use Repository decorator to inject dependecy in " + target.name);
             }
         }
     }
 
-    private getConstructorParameters(target: any) {
+    private static getConstructorParameters(target: any) {
         const classString = target.toString() as string;
         let constructorParameters: string[] = [];
         if (classString) {

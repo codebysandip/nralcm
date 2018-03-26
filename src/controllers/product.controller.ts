@@ -7,8 +7,10 @@ import { Optional } from "../validators/optional.validator";
 import { HttpMethod } from "../infrastructure/http-method.enum";
 import { FilterDecorator } from "../decorators/filter.decorator";
 import { TestFilter } from "../filters/test.filter";
+import { Controller } from "../decorators/controller.decorator";
 
-// @Authorize(["Manager"])
+@Controller()
+@Authorize(["Manager"])
 export class ProductController extends BaseController {
     constructor(private productRepository: ProductRepository) {
         super();
