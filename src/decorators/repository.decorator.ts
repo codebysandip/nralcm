@@ -1,5 +1,7 @@
+import { DependencyInjection } from "../infrastructure/dependency-injection";
+
 export function Repository() {
     return function(target: any) {
-        console.log("Repository", target);
+        DependencyInjection.inject(undefined, target);
     };
 }

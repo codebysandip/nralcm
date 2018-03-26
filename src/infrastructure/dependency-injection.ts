@@ -9,18 +9,31 @@ import { RestApiConfiguration } from "./rest-api.configuration";
 export class DependencyInjection {
     private static context: HttpContext;
 
-    public static inject(context: HttpContext) {
-        this.context = context;
-        const constructorParameterTypes: any[] = Reflect.getMetadata("design:paramtypes", this.context.controller);
+    public static inject(context: HttpContext|undefined, target?: any) {
+        let targetObject: any;
+        if (context) {
+            this.context = context;
+            targetObject = this.context.controller;
+        } else if (target) {
+            targetObject = target;
+        } else {
+            throw new Error("HttpContext and target both cannot be null or undefined");
+        }
+        const targetObjectInstance = new targetObject();
+
+        const constructorParameterTypes: any[] = Reflect.getMetadata("design:paramtypes", targetObject);
         if (constructorParameterTypes && constructorParameterTypes.length > 0) {
-            const constructorParameters = this.getConstructorParameters(this.context.controller);
+            const constructorParameters = this.getConstructorParameters(targetObject);
             constructorParameterTypes.forEach((val: any, index) => {
-                    this.context.controllerObject[constructorParameters[index]] = new val();
-                    this.circularInjection(val, this.context.controllerObject[constructorParameters[index]]);
+                    targetObjectInstance[constructorParameters[index]] = new val();
+                    this.circularInjection(val, targetObjectInstance[constructorParameters[index]]);
             });
-            this.context.controllerObject["request"] = this.context.request;
-            this.context.controllerObject["response"] = new HttpResponse(RestApiConfiguration.getInstance().HttpResponseHandler,
-                                                                this.context);
+            if (context) {
+                targetObjectInstance["request"] = this.context.request;
+                targetObjectInstance["response"] = new HttpResponse(RestApiConfiguration.getInstance().HttpResponseHandler,
+                    this.context);
+                context.controllerObject = targetObjectInstance;
+            }
         }
     }
 
@@ -44,8 +57,9 @@ export class DependencyInjection {
     private static getConstructorParameters(target: any) {
         const classString = target.toString() as string;
         let constructorParameters: string[] = [];
-        if (classString) {
-            let args = classString.substr(classString.indexOf("constructor"));
+        const constructorIndex = classString.indexOf("constructor");
+        if (classString && constructorIndex !== -1) {
+            let args = classString.substr(constructorIndex);
             args = args.substring(args.indexOf("(") + 1, args.indexOf(")"));
             constructorParameters = args.replace(/ /g, "").split(",");
         }
