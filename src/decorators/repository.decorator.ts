@@ -1,4 +1,4 @@
-import { DependencyInjection } from "../infrastructure/dependency-injection";
+import { DependencyInjection } from "../lifecycle";
 
 export function Repository() {
     return function(target: any) {

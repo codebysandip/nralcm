@@ -1,7 +1,6 @@
 import "reflect-metadata/Reflect";
-import { RouteDescriptor } from "../infrastructure/route-descriptor";
-import { HttpMethod } from "../infrastructure/http-method.enum";
-import { getMethodParameters } from "../common/get-method-parameters";
+import { HttpMethod, RouteDescriptor } from "../common";
+import { getMethodParameters } from "../common/functions";
 
 /**
  * Route Decorator to define routes in controller
@@ -39,7 +38,7 @@ export function Route(httpMethod: HttpMethod, route?: string) {
         const routeDescriptor: RouteDescriptor = {
             route: route || "",
             descriptor: descriptor,
-            propertyKey: propertyKey,
+            methodName: propertyKey,
             httpMethod: httpMethod
         };
 

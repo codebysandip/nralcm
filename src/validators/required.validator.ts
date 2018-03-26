@@ -1,7 +1,6 @@
 import "reflect-metadata";
 import { ValidatorData } from "./validator-data";
-import { isValidType } from "../common/check-valid-type";
-import { ModelError } from "../common/model/model-error";
+import { isValidType, ModelError } from "../common";
 
 export function Required(displayName?: string, message?: string) {
     return function(target: any, key: string) {

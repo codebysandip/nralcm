@@ -1,4 +1,4 @@
-import { ModelError } from "../common/model/model-error";
+import { ModelError } from "../common";
 
 export interface ValidatorData {
     propertyKey: string;

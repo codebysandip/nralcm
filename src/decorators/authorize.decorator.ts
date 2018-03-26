@@ -1,5 +1,5 @@
 import "reflect-metadata/Reflect";
-import { DependencyInjection } from "../infrastructure/dependency-injection";
+import { DependencyInjection } from "../lifecycle";
 /**
  * Decorator for Authentication and Authorization
  * @param roles Roles array (string)
