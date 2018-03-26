@@ -16,7 +16,7 @@ export class AuthHandler implements IAuthHandler {
         let authorize = Reflect.getMetadata(Constants.metadata.authorize, context.controller);
 
         if (!authorize) {
-            authorize = Reflect.getMetadata(Constants.metadata.authorize, context.controller, context.routeDescriptor.propertyKey);
+            authorize = Reflect.getMetadata(Constants.metadata.authorize, context.controller, context.routeDescriptor.methodName);
         }
         if (authorize && RestApiConfiguration.AuthenticationFilter) {
             const authResult = RestApiConfiguration.AuthenticationFilter.authenticate(context);

@@ -2,6 +2,9 @@ import { IFilter } from "./IFilter";
 import { HttpContext, Constants, RestApiConfiguration } from "..";
 import { RouteDescriptor } from "../../common";
 
+/**
+ * FilterExecuter excutes gloabl and decorated filters
+ */
 export class FilterExecuter {
     private usedFilters: IFilter[] = [];
     private globalFilters: IFilter[] = [];
@@ -9,9 +12,12 @@ export class FilterExecuter {
     constructor(private context: HttpContext, private routeDescriptor: RouteDescriptor) {
     }
 
+    /**
+     * Method to execute filter method beforeActionExceduted
+     */
     public executeBeforeActionExceduted() {
         this.usedFilters = Reflect.getMetadata(Constants.metadata.filter, this.context.controllerObject,
-            this.routeDescriptor.propertyKey) || [];
+            this.routeDescriptor.methodName) || [];
 
         this.globalFilters = RestApiConfiguration.Filters;
 
@@ -25,6 +31,9 @@ export class FilterExecuter {
         }
     }
 
+    /**
+     * Method to execute filter method aftereActionExceduted
+     */
     public executeAfterActionExceduted() {
         this.globalFilters.forEach(filter => {
             filter.aftereActionExceduted(this.context, this.routeDescriptor);

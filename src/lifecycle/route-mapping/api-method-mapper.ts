@@ -15,7 +15,7 @@ export function ApiMethodMapper(context: HttpContext): RouteDescriptor {
     // try to find route without param
     const routeDescriptors: RouteDescriptor[] = Reflect.getMetadata("routes", context.controllerObject);
     const routeDescriptor = routeDescriptors.find(routeDescriptor => context.request.method === routeDescriptor.httpMethod
-                                && (!url ? (routeDescriptor.propertyKey.toUpperCase() === context.request.method) : routeDescriptor.route === url));
+                                && (!url ? (routeDescriptor.methodName.toUpperCase() === context.request.method) : routeDescriptor.route === url));
     if (routeDescriptor) {
         mapQueryString(context, routeDescriptor);
         return routeDescriptor;
@@ -83,10 +83,10 @@ function mapParams(context: HttpContext, routeDescriptors: RouteDescriptor[], ur
                                 paramValue: urlParts[i]
                             };
                             const paramMetaDataArr: ParamData[] = Reflect.getMetadata(Constants.metadata.routeParams,
-                                context.controllerObject, routeDescriptors[index].propertyKey) || [];
+                                context.controllerObject, routeDescriptors[index].methodName) || [];
                             paramMetaDataArr.push(paramData);
                             Reflect.defineMetadata(Constants.metadata.routeParams, paramMetaDataArr,
-                                context.controllerObject, routeDescriptors[index].propertyKey);
+                                context.controllerObject, routeDescriptors[index].methodName);
                         } else {
                             const existingErrorMessages = Reflect.getMetadata(Constants.metadata.emptyRouteParams, context.controllerObject) as string[] || [];
                             existingErrorMessages.push(`Parametr ${route.substring(openCurlyBraceIndex + 1, closeCurlyBraceIndex)} is missing`);
@@ -110,7 +110,7 @@ function mapParams(context: HttpContext, routeDescriptors: RouteDescriptor[], ur
 function mapQueryString(context: HttpContext, routeDescriptor: RouteDescriptor) {
     if (context.request.query) {
         const existingQueryStrings = Reflect.getMetadata(Constants.metadata.queryString, context.controllerObject,
-            routeDescriptor.propertyKey) as QueryString[] || [];
+            routeDescriptor.methodName) as QueryString[] || [];
         Object.keys(context.request.query).forEach(qs => {
             existingQueryStrings.push({
                 name: qs,
@@ -119,7 +119,7 @@ function mapQueryString(context: HttpContext, routeDescriptor: RouteDescriptor) 
         });
 
         Reflect.defineMetadata(Constants.metadata.queryString, existingQueryStrings, context.controllerObject,
-            routeDescriptor.propertyKey);
+            routeDescriptor.methodName);
     }
 }
 
