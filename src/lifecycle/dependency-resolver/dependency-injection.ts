@@ -7,7 +7,12 @@ import { HttpContext, HttpResponse } from "..";
 export class DependencyInjection {
     private static context: HttpContext;
 
-    public static inject(context: HttpContext|undefined, target?: any) {
+    /**
+     * Method to inject depedency
+     * @param context HttpContext Object in case when resolving dependency of controller. undefined when resolving dependency of class
+     * @param target class object when HttpContext undefined
+     */
+    public static inject(context: HttpContext|undefined, target?: any): void {
         let targetObject: any;
         if (context) {
             this.context = context;
@@ -34,7 +39,12 @@ export class DependencyInjection {
         }
     }
 
-    private static circularInjection(target: any, source: any) {
+    /**
+     * Method to inject dependency
+     * @param target target objectto inject dependency
+     * @param source source object which will hold dependency object
+     */
+    private static circularInjection(target: any, source: any): void {
         const constructorParameters = this.getConstructorParameters(target);
         if (constructorParameters && constructorParameters.length > 0) {
             const constructorParameterTypes: any[] = Reflect.getMetadata("design:paramtypes", target);
@@ -51,7 +61,11 @@ export class DependencyInjection {
         }
     }
 
-    private static getConstructorParameters(target: any) {
+    /**
+     * Method to get constructor parameter names
+     * @param target class Object
+     */
+    private static getConstructorParameters(target: any): string[] {
         const classString = target.toString() as string;
         let constructorParameters: string[] = [];
         const constructorIndex = classString.indexOf("constructor");

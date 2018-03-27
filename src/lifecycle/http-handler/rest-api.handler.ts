@@ -1,5 +1,5 @@
 import { IHttpHandler } from "./IHttpHandler";
-import { HttpContext } from "../http-context";
+import { HttpContext, DefaultHttpResponseHandler } from "..";
 import "reflect-metadata/Reflect";
 import { RestApiConfiguration } from "../config";
 import { getContext } from "../../common/functions";
@@ -7,11 +7,12 @@ import { Request, Response } from "express-serve-static-core";
 import { ControllerMapper } from "../route-mapping";
 import { ApiMethodMapper } from "../route-mapping";
 import { DependencyInjection } from "../dependency-resolver";
-import { Constants } from "../rest-api-constants";
-import { ServerResponse } from "http";
+import { Constants } from "..";
+// import { ServerResponse } from "http";
 import { FilterExecuter } from "../filter";
 import { UnAuthenticateException, BadRequestException } from "../../exceptions";
 import { IRoute } from "../../common";
+
 
 
 /**
@@ -20,8 +21,10 @@ import { IRoute } from "../../common";
 export class RestApiHandler implements IHttpHandler {
 
     constructor() {
+        if (!RestApiConfiguration.HttpResponseHandler) {
+            RestApiConfiguration.HttpResponseHandler = new DefaultHttpResponseHandler();
+        }
     }
-
     /**
      * Process request of rest api
      * @param req Request object
@@ -80,7 +83,7 @@ export class RestApiHandler implements IHttpHandler {
 
             const method = routeDescriptor.descriptor.value;
             const data = method.apply(context.controllerObject as Object, args);
-            if (!(data instanceof ServerResponse) || !context.response.headersSent) {
+            if (!context.response.headersSent) {
                 filterExecuter.executeAfterActionExceduted();
                 context.response.json(data);
             }

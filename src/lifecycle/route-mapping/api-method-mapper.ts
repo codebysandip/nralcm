@@ -107,7 +107,7 @@ function mapParams(context: HttpContext, routeDescriptors: RouteDescriptor[], ur
  * @param context HttpContext Object
  * @param routeDescriptor RouteDescriptor object that holds metadata of api method
  */
-function mapQueryString(context: HttpContext, routeDescriptor: RouteDescriptor) {
+function mapQueryString(context: HttpContext, routeDescriptor: RouteDescriptor): void {
     if (context.request.query) {
         const existingQueryStrings = Reflect.getMetadata(Constants.metadata.queryString, context.controllerObject,
             routeDescriptor.methodName) as QueryString[] || [];

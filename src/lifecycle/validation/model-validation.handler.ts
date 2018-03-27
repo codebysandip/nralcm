@@ -3,6 +3,9 @@ import { HttpContext, Constants } from "..";
 import { getMethodParameters, ParamData, QueryString, ModelError, isValidType, HttpMethod, RouteDescriptor } from "../../common";
 import { ValidatorData } from "../../validators/validator-data";
 
+/**
+ * ModelValidationHandler class to handler validation of params, querystring and request body
+ */
 export class ModelValidationHandler implements IModelValidation {
 
     /**
@@ -18,6 +21,12 @@ export class ModelValidationHandler implements IModelValidation {
         return [...modelErrorArray, ...existingmodelErrorArray];
     }
 
+    /**
+     * 
+     * @param context HttpContext Object
+     * @param routeDescriptor meta data of routes
+     * @returns ModelError array
+     */
     private validateParamsAndQueryWithMethodParameters(context: HttpContext, routeDescriptor: RouteDescriptor): ModelError[] {
         const methodParameterTypes = Reflect.getMetadata("design:paramtypes", context.controllerObject,
             routeDescriptor.methodName) as Function[];
@@ -113,6 +122,11 @@ export class ModelValidationHandler implements IModelValidation {
         return modelErrorArray;
     }
 
+    /**
+     * Method to validate body of request
+     * @param context HttpContext Object
+     * @param paramtype Type of Request body
+     */
     private validateRequestBody(context: HttpContext, paramtype: any): ModelError[] {
         const instance = new paramtype();
         const validatorDataArr = Reflect.getMetadata(Constants.metadata.validation, instance) as ValidatorData[];

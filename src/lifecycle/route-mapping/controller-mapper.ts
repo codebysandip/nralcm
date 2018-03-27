@@ -18,7 +18,11 @@ export function ControllerMapper(context: HttpContext): IRoute {
     throw new NotFoundException(context);
 }
 
-function getUrlParts(url: string) {
+/**
+ * Function to get url parts after api excluding query string
+ * @param url request url
+ */
+function getUrlParts(url: string): string[] {
     url = url.substring(url.indexOf("api") + 3);
     url = url.startsWith("/") ? url.substring(1) : url;
     const queryStringIndex = url.indexOf("?");

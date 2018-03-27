@@ -35,6 +35,11 @@
             "check-separator",
             "check-type"
         ],
+        "typedef": [
+            true,
+            "call-signature",
+            "property-declaration"
+        ],
         "typedef-whitespace": [
             true,
             {
@@ -52,11 +57,49 @@
                 "variable-declaration": "onespace"
             }
         ],
+        "completed-docs": [
+            true,
+            {
+                "classes": {
+                    "visibilities": "all"
+                },
+                "enums": {
+                    "visibilities": "all"
+                },
+                "functions": {
+                    "visibilities": "all"
+                },
+                "methods": {
+                    "privacies": "all",
+                    "locations": "all"
+                },
+                "properties": {
+                    "privacies": "all",
+                    "locations": "all"
+                }
+            }
+        ],
+        "member-ordering": [
+            true,
+            {
+                "order": [
+                    "public-static-field",
+                    "public-instance-field",
+                    "public-constructor",
+                    "private-static-field",
+                    "private-instance-field",
+                    "private-constructor",
+                    "public-instance-method",
+                    "protected-instance-method",
+                    "private-instance-method"
+                ]
+            }
+        ],
         "no-internal-module": true,
         "no-trailing-whitespace": true,
         "no-null-keyword": true,
         "prefer-const": true,
         "prefer-method-signature": true,
-        "jsdoc-format": true
+        "jsdoc-format": true,
     }
 }

@@ -17,6 +17,5 @@ export interface IFilter {
      * @param httpContext HttpContext Object
      * @param routeDescriptor RouteDescriptor data
      */
-
     aftereActionExceduted(httpContext: HttpContext, routeDescriptor: RouteDescriptor): void;
 }

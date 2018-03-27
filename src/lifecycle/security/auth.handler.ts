@@ -1,17 +1,22 @@
 import { IAuthHandler } from "../security";
 import "reflect-metadata/Reflect";
-import { HttpContext } from "../http-context";
+import { HttpContext } from "..";
 import { RestApiConfiguration } from "../config";
 import { UnAuthenticateException, UnAuthorizeException } from "../../exceptions";
 
-import { Constants } from "../rest-api-constants";
+import { Constants } from "..";
 
 /**
- * Auth Handler to process authentication
+ * Handler to process authentication
  * and authorization
  */
 export class AuthHandler implements IAuthHandler {
 
+    /**
+     * Method to process authentication
+     * and authorization
+     * @param context HttpContext Object
+     */
     public handle(context: HttpContext): boolean {
         let authorize = Reflect.getMetadata(Constants.metadata.authorize, context.controller);
 

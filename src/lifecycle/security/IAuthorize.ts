@@ -5,7 +5,7 @@ import { HttpContext } from "..";
  */
 export interface IAuthorize {
     /**
-     * Method for check authorization of request
+     * Method to check authorization of request
      * @param context HttpContext Object
      * @param roles Roles for access of api
      */
