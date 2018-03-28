@@ -15,7 +15,6 @@ export class DefaultHttpResponseHandler implements IHttpResponseHandler {
     public sendResponse<T>(context: HttpContext, httpResponseMessage: HttpResponseMessage<T>): Response {
         if (httpResponseMessage.headers.size > 0) {
             for (let [key, value] of httpResponseMessage.headers) {
-                console.log(key, value);
                 context.response.setHeader(key, value);
             }
         }

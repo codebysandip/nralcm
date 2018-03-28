@@ -1,5 +1,5 @@
 import "reflect-metadata/Reflect";
-import { HttpContext, HttpResponse } from "..";
+import { HttpContext, HttpResponse, RestApiConfiguration } from "..";
 
 /**
  * Resolves Dependency Of controller
@@ -33,7 +33,7 @@ export class DependencyInjection {
             });
             if (context) {
                 targetObjectInstance["request"] = this.context.request;
-                targetObjectInstance["response"] = new HttpResponse(this.context);
+                targetObjectInstance["response"] = new HttpResponse(this.context, RestApiConfiguration.HttpResponseHandler);
                 context.controllerObject = targetObjectInstance;
             }
         }
