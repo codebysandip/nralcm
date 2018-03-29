@@ -3,7 +3,7 @@ import { HttpContext } from "..";
 import { ServerErrorException } from "../../exceptions";
 
 /**
- * ExceptionHandler to handle all expceptions in rest api
+ * Default ExceptionHandler to handle all expceptions in rest api
  */
 export class ExceptionHandler implements IExceptionHandler {
     /**

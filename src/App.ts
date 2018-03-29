@@ -1,5 +1,5 @@
 import * as express from "express";
-import { HandlerDispatcher } from "./lifecycle";
+import { HandlerDispatcher, RestApiConfiguration } from "./lifecycle";
 import * as bodyparser from "body-parser";
 import { Request, Response } from "express-serve-static-core";
 import { getContext } from "./common/functions";
@@ -13,7 +13,8 @@ class App {
     constructor() {
         this.express = express();
         this.express.use(bodyparser.json());
-        AppConfig.register();
+        let restApiConfiguration = new RestApiConfiguration();
+        new AppConfig(restApiConfiguration).register();
 
         this.express.use((err: any, req: Request, res: Response, next: any): void|SyntaxErrorException => {
             if (err) {

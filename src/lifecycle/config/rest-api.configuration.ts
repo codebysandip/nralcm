@@ -4,29 +4,28 @@ import { IExceptionHandler } from "../exception-handler";
 import { IAuthHandler } from "../security";
 import { IHttpResponseHandler } from "../http-handler";
 import { IModelValidation } from "../validation";
-import { AuthHandler } from "../security";
 import { IFilter } from "../filter";
 import { IHttpRequestHandler } from "../http-handler";
 import { IRoute } from "../../common";
 /**
- * RestApiConfiguration class provides static property and methods to configure Rest api
+ * RestApiConfiguration class provides property and methods to configure Rest api
  */
 export class RestApiConfiguration {
-    private static _authenticationFilter: IAuthenticate;
-    private static _authorizeFilter: IAuthorize;
-    private static _exceptionHandler: IExceptionHandler;
-    private static _authHandler: IAuthHandler = new AuthHandler();
-    private static _modelValidationHandler: IModelValidation;
-    private static _httpResponseHandler: IHttpResponseHandler;
-    private static _filters: IFilter[] = [];
-    private static _httpRrequestHandler: IHttpRequestHandler;
-    private static _routes: IRoute[] = [];
+    private _authenticationFilter: IAuthenticate;
+    private _authorizeFilter: IAuthorize;
+    private _exceptionHandler: IExceptionHandler;
+    private _authHandler: IAuthHandler;
+    private _modelValidationHandler: IModelValidation;
+    private _httpResponseHandler: IHttpResponseHandler;
+    private _filters: IFilter[] = [];
+    private _httpRrequestHandler: IHttpRequestHandler;
+    private _routes: IRoute[] = [];
 
     /**
      * set AuthenticationFilter
      * @param filter - class that implemented interface IAuthenticate
      */
-    static set AuthenticationFilter(filter: IAuthenticate) {
+    set AuthenticationFilter(filter: IAuthenticate) {
         this._authenticationFilter = filter;
     }
 
@@ -34,7 +33,7 @@ export class RestApiConfiguration {
      * get AuthenticationFilter
      */
     // tslint:disable-next-line:typedef
-    static get AuthenticationFilter() {
+    get AuthenticationFilter() {
         return this._authenticationFilter;
     }
 
@@ -42,7 +41,7 @@ export class RestApiConfiguration {
      * set AuthorizeFilter
      * @param filter - class that implemented interface IAuthorize
      */
-    static set AuthorizeFilter(filter: IAuthorize) {
+    set AuthorizeFilter(filter: IAuthorize) {
         this._authorizeFilter = filter;
     }
 
@@ -50,7 +49,7 @@ export class RestApiConfiguration {
      * get AuthorizeFilter
      */
     // tslint:disable-next-line:typedef
-    static get AuthorizeFilter() {
+    get AuthorizeFilter() {
         return this._authorizeFilter;
     }
 
@@ -58,7 +57,7 @@ export class RestApiConfiguration {
      * set ExceptionHandler
      * @param handler - class that implemented interface IExceptionHandler
      */
-    static set ExceptionHandler(handler: IExceptionHandler) {
+    set ExceptionHandler(handler: IExceptionHandler) {
         this._exceptionHandler = handler;
     }
 
@@ -66,7 +65,7 @@ export class RestApiConfiguration {
      * get ExceptionHandler
      */
     // tslint:disable-next-line:typedef
-    static get ExceptionHandler() {
+    get ExceptionHandler() {
         return this._exceptionHandler;
     }
 
@@ -74,15 +73,22 @@ export class RestApiConfiguration {
      * get AuthHandler
      */
     // tslint:disable-next-line:typedef
-    static get AuthHandler() {
+    get AuthHandler() {
         return this._authHandler;
+    }
+
+    /**
+     * set IAuthHandler
+     */
+    set AuthHandler(authHandler: IAuthHandler) {
+        this._authHandler = authHandler;
     }
 
     /**
      * set ModelValidationHandler
      * @param handler - class that implemented interface IExceptionHandler
      */
-    static set ModelValidationHandler(handler: IModelValidation) {
+    set ModelValidationHandler(handler: IModelValidation) {
         this._modelValidationHandler = handler;
     }
 
@@ -90,7 +96,7 @@ export class RestApiConfiguration {
      * get ModelValidationHandler
      */
     // tslint:disable-next-line:typedef
-    static get ModelValidationHandler() {
+    get ModelValidationHandler() {
         return this._modelValidationHandler;
     }
 
@@ -98,7 +104,7 @@ export class RestApiConfiguration {
      * set HttpResponseHandler
      * @param handler - class that implemented interface IHttpResponseHandler
      */
-    static set HttpResponseHandler(handler: IHttpResponseHandler) {
+    set HttpResponseHandler(handler: IHttpResponseHandler) {
         this._httpResponseHandler = handler;
     }
 
@@ -106,7 +112,7 @@ export class RestApiConfiguration {
      * get HttpResponseHandler
      */
     // tslint:disable-next-line:typedef
-    static get HttpResponseHandler() {
+    get HttpResponseHandler() {
         return this._httpResponseHandler;
     }
 
@@ -114,7 +120,7 @@ export class RestApiConfiguration {
      * get registered filters
      */
     // tslint:disable-next-line:typedef
-    static get Filters() {
+    get Filters() {
         return this._filters;
     }
 
@@ -122,7 +128,7 @@ export class RestApiConfiguration {
      * register global filters
      * @param filter - class that implemented interface IFilter
      */
-    public static addFilter (filter: IFilter): void {
+    public addFilter (filter: IFilter): void {
         this._filters.push(filter);
     }
 
@@ -130,7 +136,7 @@ export class RestApiConfiguration {
      * get HttpRequestHandler
      */
     // tslint:disable-next-line:typedef
-    static get HttpRequestHandler() {
+    get HttpRequestHandler() {
         return this._httpRrequestHandler;
     }
 
@@ -138,7 +144,7 @@ export class RestApiConfiguration {
      * set HttpRequestHandler
      * @param httpRequestHandler - class that implemented interface IHttpRequestHandler
      */
-    static set HttpRequestHandler(httpRequestHandler: IHttpRequestHandler) {
+    set HttpRequestHandler(httpRequestHandler: IHttpRequestHandler) {
         this._httpRrequestHandler = httpRequestHandler;
     }
 
@@ -146,7 +152,7 @@ export class RestApiConfiguration {
      * get registered api routes
      */
     // tslint:disable-next-line:typedef
-    static get routes() {
+    get routes() {
         return this._routes;
     }
 
@@ -154,7 +160,7 @@ export class RestApiConfiguration {
      * method to add api routes
      * @param routes Route Object array
      */
-    public static addRoutes(routes: IRoute[]): void {
+    public addRoutes(routes: IRoute[]): void {
         this._routes = [...this._routes, ...routes];
     }
 }

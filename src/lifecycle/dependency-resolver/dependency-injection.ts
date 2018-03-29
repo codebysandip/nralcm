@@ -1,13 +1,13 @@
 import "reflect-metadata/Reflect";
-import { HttpContext, HttpResponse, IHttpResponseHandler } from "..";
+import { HttpContext, HttpResponse } from "..";
 import { getConstructorParameters, circularInjection } from "../../common/functions";
 
 /**
  * Resolves Dependency Of controller
  */
 export class DependencyInjection {
-    
-    constructor(private context: HttpContext, private _httpResponseHandler: IHttpResponseHandler) {
+
+    constructor(private context: HttpContext, private httpResponse: HttpResponse) {
     }
 
     /**
@@ -23,13 +23,12 @@ export class DependencyInjection {
         if (constructorParameterTypes && constructorParameterTypes.length > 0) {
             const constructorParameters = getConstructorParameters(targetObject);
             constructorParameterTypes.forEach((val: any, index) => {
-                    targetObjectInstance[constructorParameters[index]] = new val();
-                    circularInjection(val, targetObjectInstance[constructorParameters[index]]);
-                    console.log("targetObjectInstance", targetObjectInstance);
+                targetObjectInstance[constructorParameters[index]] = new val();
+                circularInjection(val, targetObjectInstance[constructorParameters[index]]);
             });
             targetObjectInstance["request"] = this.context.request;
-            targetObjectInstance["response"] = new HttpResponse(this.context, this._httpResponseHandler);
+            targetObjectInstance["response"] = this.httpResponse;
             this.context.controllerObject = targetObjectInstance;
         }
-    }  
+    }
 }

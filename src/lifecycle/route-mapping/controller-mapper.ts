@@ -8,9 +8,9 @@ import { NotFoundException } from "../../exceptions";
  * @param context HttpContext Object
  * @returns route
  */
-export function ControllerMapper(context: HttpContext): IRoute {
+export function ControllerMapper(context: HttpContext, restApiConfiguration: RestApiConfiguration): IRoute {
     const urlParts = getUrlParts(context.request.url);
-    const route = RestApiConfiguration.routes.find(route => urlParts[0] == route.path);
+    const route = restApiConfiguration.routes.find(route => urlParts[0] == route.path);
 
     if (route && urlParts.length >= 1) {
         return route;

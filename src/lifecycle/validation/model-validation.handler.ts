@@ -28,96 +28,99 @@ export class ModelValidationHandler implements IModelValidation {
      * @returns ModelError array
      */
     private validateParamsAndQueryWithMethodParameters(context: HttpContext, routeDescriptor: RouteDescriptor): ModelError[] {
-        const methodParameterTypes = Reflect.getMetadata("design:paramtypes", context.controllerObject,
-            routeDescriptor.methodName) as Function[];
-        const methodParameters = getMethodParameters(context.controller, routeDescriptor.methodName);
-        const validationMetaData = Reflect.getMetadata(Constants.metadata.validation, context.controllerObject,
-            routeDescriptor.methodName) as ValidatorData[];
-        const paramMetaData = Reflect.getMetadata(Constants.metadata.routeParams, context.controllerObject,
-            routeDescriptor.methodName) as ParamData[] || [];
-        const queryStringMetaData = Reflect.getMetadata(Constants.metadata.queryString, context.controllerObject,
-            routeDescriptor.methodName) as QueryString[];
-        let optionalParameters: ValidatorData[] = [];
-        if (validationMetaData && validationMetaData.length) {
-            optionalParameters = validationMetaData.filter(m => m.validator === "Optional");
-        }
-
         let modelErrorArray: ModelError[] = [];
-        const args = new Array(methodParameters.length);
-        methodParameters.forEach((par, index) => {
-            let isFound = false;
-            const param = paramMetaData.find(p => p.paramName === par);
+        const methodParameters = getMethodParameters(context.controller, routeDescriptor.methodName);
 
-            if (param) {
-                isFound = true;
-                if (!isValidType(methodParameterTypes[index], param.paramValue)) {
-                    const modelError: ModelError = {
-                        propertyName: param.paramName,
-                        errorMessage: `Param ${param.paramName} of type ${methodParameterTypes[index].name} is not valid`,
-                        isTypeError: true,
-                        typeOfProperty: methodParameterTypes[index],
-                        errorType: "Param"
-                    };
-                    modelErrorArray.push(modelError);
-                } else {
-                    args[index] = param.paramValue;
-                }
-            } else {
-                const queryString = queryStringMetaData ? queryStringMetaData.find(q => q.name === par) : undefined;
-                if (queryString) {
+        if (methodParameters.length) {
+            const methodParameterTypes = Reflect.getMetadata("design:paramtypes", context.controllerObject,
+                routeDescriptor.methodName) as Function[];
+            const validationMetaData = Reflect.getMetadata(Constants.metadata.validation, context.controllerObject,
+                routeDescriptor.methodName) as ValidatorData[];
+            const paramMetaData = Reflect.getMetadata(Constants.metadata.routeParams, context.controllerObject,
+                routeDescriptor.methodName) as ParamData[] || [];
+            const queryStringMetaData = Reflect.getMetadata(Constants.metadata.queryString, context.controllerObject,
+                routeDescriptor.methodName) as QueryString[];
+            let optionalParameters: ValidatorData[] = [];
+            if (validationMetaData && validationMetaData.length) {
+                optionalParameters = validationMetaData.filter(m => m.validator === "Optional");
+            }
+
+            const args = new Array(methodParameters.length);
+            methodParameters.forEach((par, index) => {
+                let isFound = false;
+                const param = paramMetaData.find(p => p.paramName === par);
+
+                if (param) {
                     isFound = true;
-                    if (!isValidType(methodParameterTypes[index], queryString.value)) {
+                    if (!isValidType(methodParameterTypes[index], param.paramValue)) {
                         const modelError: ModelError = {
-                            propertyName: queryString.name,
-                            errorMessage: `Parameter ${queryString.name} of type ${methodParameterTypes[index].name} is not valid`,
+                            propertyName: param.paramName,
+                            errorMessage: `Param ${param.paramName} of type ${methodParameterTypes[index].name} is not valid`,
                             isTypeError: true,
                             typeOfProperty: methodParameterTypes[index],
-                            errorType: "QueryString"
+                            errorType: "Param"
                         };
                         modelErrorArray.push(modelError);
                     } else {
-                        args[index] = queryString.value;
+                        args[index] = param.paramValue;
                     }
                 } else {
-                    const optionalParameter = optionalParameters ? optionalParameters.find(o => o.parameterIndex === index) : undefined;
-                    if (optionalParameter) {
+                    const queryString = queryStringMetaData ? queryStringMetaData.find(q => q.name === par) : undefined;
+                    if (queryString) {
                         isFound = true;
-                    }
-                }
-            }
-            if (!isFound) {
-                if (routeDescriptor.httpMethod === HttpMethod.GET) {
-                    const modelError: ModelError = {
-                        propertyName: par,
-                        errorMessage: `Parameter ${par} is missing in request`,
-                        isTypeError: false,
-                        typeOfProperty: undefined,
-                        errorType: "Param"
-                    };
-                    modelErrorArray.push(modelError);
-                } else {
-                    if (methodParameterTypes[index].name === "Number" || methodParameterTypes[index].name === "String"
-                        || methodParameterTypes[index].name === "Boolean") {
+                        if (!isValidType(methodParameterTypes[index], queryString.value)) {
                             const modelError: ModelError = {
-                                propertyName: par,
-                                errorMessage: `Parameter ${par} is missing in request`,
-                                isTypeError: false,
-                                typeOfProperty: undefined,
-                                errorType: "Param"
+                                propertyName: queryString.name,
+                                errorMessage: `Parameter ${queryString.name} of type ${methodParameterTypes[index].name} is not valid`,
+                                isTypeError: true,
+                                typeOfProperty: methodParameterTypes[index],
+                                errorType: "QueryString"
                             };
                             modelErrorArray.push(modelError);
                         } else {
-                        if (methodParameterTypes[index].name !== "Object") {
-                            const result = this.validateRequestBody(context, methodParameterTypes[index]);
-                            modelErrorArray = [...modelErrorArray, ...result];
+                            args[index] = queryString.value;
                         }
-                        args[index] = context.request.body;
+                    } else {
+                        const optionalParameter = optionalParameters ? optionalParameters.find(o => o.parameterIndex === index) : undefined;
+                        if (optionalParameter) {
+                            isFound = true;
+                        }
                     }
                 }
+                if (!isFound) {
+                    if (routeDescriptor.httpMethod === HttpMethod.GET) {
+                        const modelError: ModelError = {
+                            propertyName: par,
+                            errorMessage: `Parameter ${par} is missing in request`,
+                            isTypeError: false,
+                            typeOfProperty: undefined,
+                            errorType: "Param"
+                        };
+                        modelErrorArray.push(modelError);
+                    } else {
+                        if (methodParameterTypes[index].name === "Number" || methodParameterTypes[index].name === "String"
+                            || methodParameterTypes[index].name === "Boolean") {
+                                const modelError: ModelError = {
+                                    propertyName: par,
+                                    errorMessage: `Parameter ${par} is missing in request`,
+                                    isTypeError: false,
+                                    typeOfProperty: undefined,
+                                    errorType: "Param"
+                                };
+                                modelErrorArray.push(modelError);
+                            } else {
+                            if (methodParameterTypes[index].name !== "Object") {
+                                const result = this.validateRequestBody(context, methodParameterTypes[index]);
+                                modelErrorArray = [...modelErrorArray, ...result];
+                            }
+                            args[index] = context.request.body;
+                        }
+                    }
+                }
+            });
+            if (modelErrorArray.length === 0) {
+                Reflect.defineMetadata(Constants.metadata.args, args, context.controllerObject);
             }
-        });
-        if (modelErrorArray.length === 0) {
-            Reflect.defineMetadata(Constants.metadata.args, args, context.controllerObject);
         }
         return modelErrorArray;
     }

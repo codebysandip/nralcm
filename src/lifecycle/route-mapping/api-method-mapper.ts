@@ -11,11 +11,13 @@ import { NotFoundException } from "../../exceptions";
 export function ApiMethodMapper(context: HttpContext): RouteDescriptor {
     const urlParts = getUrlParts(context.request.url);
     const url = urlParts.slice(1).join("/");
-    console.log("httpMethod", context.request.method);
     // try to find route without param
     const routeDescriptors: RouteDescriptor[] = Reflect.getMetadata("routes", context.controllerObject);
-    const routeDescriptor = routeDescriptors.find(routeDescriptor => context.request.method === routeDescriptor.httpMethod
-                                && (!url ? (routeDescriptor.methodName.toUpperCase() === context.request.method) : routeDescriptor.route === url));
+    const routeDescriptor = routeDescriptors.find(routeDescriptor =>  {
+        return context.request.method.toLowerCase() === routeDescriptor.httpMethod.toLowerCase()
+                    && (!url ? (routeDescriptor.methodName.toUpperCase() === context.request.method.toUpperCase()) :
+                        routeDescriptor.route === url);
+    });
     if (routeDescriptor) {
         mapQueryString(context, routeDescriptor);
         return routeDescriptor;
@@ -58,7 +60,6 @@ function mapParams(context: HttpContext, routeDescriptors: RouteDescriptor[], ur
                                 routeDescriptor.route.substring(1).split("/") : routeDescriptor.route.split("/");
 
         const urlParts = url.startsWith("/") ? url.substring(1).split("/") : url.split("/");
-        console.log("urlparts", routeParts, urlParts);
 
         if (routeParts.length === urlParts.length && routeDescriptor.route.indexOf("{") >= 0 && routeDescriptor.route.indexOf("}") >= 0) {
             const nonParamsRouteParts = routeParts.filter(route => route.indexOf("{") === -1 || route.indexOf("}") === -1);

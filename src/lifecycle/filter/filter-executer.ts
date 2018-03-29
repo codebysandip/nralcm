@@ -1,5 +1,5 @@
 import { IFilter } from "./IFilter";
-import { HttpContext, Constants, RestApiConfiguration } from "..";
+import { HttpContext, Constants } from "..";
 import { RouteDescriptor } from "../../common";
 
 /**
@@ -7,11 +7,10 @@ import { RouteDescriptor } from "../../common";
  */
 export class FilterExecuter {
 
-    constructor(private context: HttpContext, private routeDescriptor: RouteDescriptor) {
+    constructor(private context: HttpContext, private routeDescriptor: RouteDescriptor, private globalFilters: IFilter[]) {
     }
 
     private usedFilters: IFilter[] = [];
-    private globalFilters: IFilter[] = [];
 
 
     /**
@@ -20,8 +19,6 @@ export class FilterExecuter {
     public executeBeforeActionExceduted(): void {
         this.usedFilters = Reflect.getMetadata(Constants.metadata.filter, this.context.controllerObject,
             this.routeDescriptor.methodName) || [];
-
-        this.globalFilters = RestApiConfiguration.Filters;
 
         this.globalFilters.forEach(filter => {
             filter.beforeActionExceduted(this.context, this.routeDescriptor);

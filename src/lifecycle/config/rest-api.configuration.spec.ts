@@ -8,9 +8,10 @@ describe("RestApiConfiguration", () => {
     let filter: Partial<IFilter> = {};
     describe("addFilter", () => {
         it("should add filter and length of RestApiConfiguration.Filters must be 1", () => {
-            RestApiConfiguration.addFilter(<IFilter>filter);
+            let restApiConfiguration = new RestApiConfiguration();
+            restApiConfiguration.addFilter(<IFilter>filter);
 
-            let filters = RestApiConfiguration.Filters;
+            let filters = restApiConfiguration.Filters;
 
             expect(filters.length).to.equal(1);
         });
@@ -23,8 +24,9 @@ describe("RestApiConfiguration", () => {
                 path: "demo"}
             ];
 
-            RestApiConfiguration.addRoutes(<IRoute[]>routes);
-            expect(RestApiConfiguration.routes.length).to.equal(1);
+            let restApiConfiguration = new RestApiConfiguration();
+            restApiConfiguration.addRoutes(<IRoute[]>routes);
+            expect(restApiConfiguration.routes.length).to.equal(1);
         });
     });
 });

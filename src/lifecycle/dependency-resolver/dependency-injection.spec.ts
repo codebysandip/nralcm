@@ -1,8 +1,8 @@
 import "mocha";
 import { expect } from "chai";
-import * as sinon from "sinon";
+// import * as sinon from "sinon";
 import { DependencyInjection } from ".";
-import { HttpContext, BaseController, IHttpResponseHandler } from "..";
+import { HttpContext, BaseController, HttpResponse } from "..";
 import { Request, Response } from "express-serve-static-core";
 import { Controller, Repository } from "../../decorators";
 
@@ -14,10 +14,11 @@ describe("DependencyInjection", () => {
     describe("inject", () => {
         it("should inject dependency of DemoRepository in DemoController", () => {
             httpContext.controller = DemoController;
-            let httpResponseHandler: Partial<IHttpResponseHandler> = {
-                sendResponse: sinon.stub()
-            };
-            let di = new DependencyInjection(httpContext, <IHttpResponseHandler>httpResponseHandler);
+            // let httpResponseHandler: Partial<IHttpResponseHandler> = {
+            //     sendResponse: sinon.stub()
+            // };
+            let httpResponse: Partial<HttpResponse> = {};
+            let di = new DependencyInjection(httpContext, <HttpResponse>httpResponse);
             di.inject();
             let result = httpContext.controllerObject.get();
             expect(result.id).to.equal(1);

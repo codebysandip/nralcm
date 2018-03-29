@@ -46,4 +46,10 @@ export class ProductController extends BaseController {
     public post(product: Product, id: string): Object {
         return { data: product, id: id };
     }
+
+    @Route(HttpMethod.GET, "test-filter")
+    @FilterDecorator(new TestFilter())
+    public testFilter() {
+        return { message: "filter test" };
+    }
 }
