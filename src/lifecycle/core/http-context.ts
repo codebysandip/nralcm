@@ -1,7 +1,10 @@
 import { Request, Response } from "express-serve-static-core";
-import { AuthPrinciple } from ".";
-import { RouteDescriptor } from "../common";
+import { AuthPrinciple } from "..";
+import { RouteDescriptor } from "../../common";
 
+/**
+ * HttpContext class holds data of current request lifecycle
+ */
 export class HttpContext {
     public readonly request: Request;
     public readonly response: Response;

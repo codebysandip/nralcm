@@ -2,7 +2,8 @@ import { HttpContext } from "..";
 import { RouteDescriptor, ModelError } from "../../common";
 
 /**
- * Inferface for implemenation of model validation
+ * Inferface for implemenation of model validation.
+ * ModelValidation handles validation of param, querystring and request body
  */
 export interface IModelValidation {
     /**
