@@ -5,7 +5,7 @@ import { HttpContext } from "..";
  */
 export interface IAuthenticate {
     /**
-     * Method for check authentication of request
+     * Method to check authentication of request
      * @param context HttpContext Object
      * @returns true or false
      */

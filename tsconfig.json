@@ -2,7 +2,9 @@
     "compilerOptions": {
         "target": "es6",
         "module": "commonjs",
-        "outDir": "",
+        // uncomment below line when publish node module
+        // "outDir": "../nralcm-npm",
+        "outDir": "dist",
         "strictNullChecks": true,
         "noImplicitReturns": true,
         "noImplicitAny": true,
@@ -19,6 +21,16 @@
         "src/**/*.ts"
     ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+        // uncomment below lines when publish node module
+        // "src/controllers",
+        // "src/filters",
+        // "src/handlers",
+        // "src/models",
+        // "src/repository",
+        // "src/app-config.ts",
+        // "src/app.routes.ts",
+        // "src/App.ts",
+        // "src/index.ts"
     ]
 }

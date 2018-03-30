@@ -8,9 +8,9 @@ import { NotFoundException } from "../../exceptions";
  * @param context HttpContext Object
  * @returns route
  */
-export function ControllerMapper(context: HttpContext): IRoute {
+export function ControllerMapper(context: HttpContext, restApiConfiguration: RestApiConfiguration): IRoute {
     const urlParts = getUrlParts(context.request.url);
-    const route = RestApiConfiguration.routes.find(route => urlParts[0] == route.path);
+    const route = restApiConfiguration.routes.find(route => urlParts[0] == route.path);
 
     if (route && urlParts.length >= 1) {
         return route;
@@ -18,7 +18,11 @@ export function ControllerMapper(context: HttpContext): IRoute {
     throw new NotFoundException(context);
 }
 
-function getUrlParts(url: string) {
+/**
+ * Function to get url parts after api excluding query string
+ * @param url request url
+ */
+function getUrlParts(url: string): string[] {
     url = url.substring(url.indexOf("api") + 3);
     url = url.startsWith("/") ? url.substring(1) : url;
     const queryStringIndex = url.indexOf("?");

@@ -4,90 +4,163 @@ import { IExceptionHandler } from "../exception-handler";
 import { IAuthHandler } from "../security";
 import { IHttpResponseHandler } from "../http-handler";
 import { IModelValidation } from "../validation";
-import { AuthHandler } from "../security";
 import { IFilter } from "../filter";
 import { IHttpRequestHandler } from "../http-handler";
 import { IRoute } from "../../common";
 /**
- * Configuration class for Rest api
+ * RestApiConfiguration class provides property and methods to configure Rest api
  */
 export class RestApiConfiguration {
-    private static _authenticationFilter: IAuthenticate;
-    private static _authorizeFilter: IAuthorize;
-    private static _exceptionHandler: IExceptionHandler;
-    private static _authHandler: IAuthHandler = new AuthHandler();
-    private static _modelValidationHandler: IModelValidation;
-    private static _httpResponseHandler: IHttpResponseHandler;
-    private static _filters: IFilter[] = [];
-    private static _httpRrequestHandler: IHttpRequestHandler;
-    private static _routes: IRoute[] = [];
+    private _authenticationFilter: IAuthenticate;
+    private _authorizeFilter: IAuthorize;
+    private _exceptionHandler: IExceptionHandler;
+    private _authHandler: IAuthHandler;
+    private _modelValidationHandler: IModelValidation;
+    private _httpResponseHandler: IHttpResponseHandler;
+    private _filters: IFilter[] = [];
+    private _httpRrequestHandler: IHttpRequestHandler;
+    private _routes: IRoute[] = [];
 
-
-    static set AuthenticationFilter(filter: IAuthenticate) {
+    /**
+     * set AuthenticationFilter
+     * @param filter - class that implemented interface IAuthenticate
+     */
+    set AuthenticationFilter(filter: IAuthenticate) {
         this._authenticationFilter = filter;
     }
 
-    static get AuthenticationFilter() {
+    /**
+     * get AuthenticationFilter
+     */
+    // tslint:disable-next-line:typedef
+    get AuthenticationFilter() {
         return this._authenticationFilter;
     }
 
-    static set AuthorizeFilter(filter: IAuthorize) {
+    /**
+     * set AuthorizeFilter
+     * @param filter - class that implemented interface IAuthorize
+     */
+    set AuthorizeFilter(filter: IAuthorize) {
         this._authorizeFilter = filter;
     }
 
-    static get AuthorizeFilter() {
+    /**
+     * get AuthorizeFilter
+     */
+    // tslint:disable-next-line:typedef
+    get AuthorizeFilter() {
         return this._authorizeFilter;
     }
 
-    static set ExceptionHandler(handler: IExceptionHandler) {
+    /**
+     * set ExceptionHandler
+     * @param handler - class that implemented interface IExceptionHandler
+     */
+    set ExceptionHandler(handler: IExceptionHandler) {
         this._exceptionHandler = handler;
     }
 
-    static get ExceptionHandler() {
+    /**
+     * get ExceptionHandler
+     */
+    // tslint:disable-next-line:typedef
+    get ExceptionHandler() {
         return this._exceptionHandler;
     }
 
-    static get AuthHandler() {
+    /**
+     * get AuthHandler
+     */
+    // tslint:disable-next-line:typedef
+    get AuthHandler() {
         return this._authHandler;
     }
 
-    static set ModelValidationHandler(handler: IModelValidation) {
+    /**
+     * set IAuthHandler
+     */
+    set AuthHandler(authHandler: IAuthHandler) {
+        this._authHandler = authHandler;
+    }
+
+    /**
+     * set ModelValidationHandler
+     * @param handler - class that implemented interface IExceptionHandler
+     */
+    set ModelValidationHandler(handler: IModelValidation) {
         this._modelValidationHandler = handler;
     }
 
-    static get ModelValidationHandler() {
+    /**
+     * get ModelValidationHandler
+     */
+    // tslint:disable-next-line:typedef
+    get ModelValidationHandler() {
         return this._modelValidationHandler;
     }
 
-    static set HttpResponseHandler(handler: IHttpResponseHandler) {
+    /**
+     * set HttpResponseHandler
+     * @param handler - class that implemented interface IHttpResponseHandler
+     */
+    set HttpResponseHandler(handler: IHttpResponseHandler) {
         this._httpResponseHandler = handler;
     }
 
-    static get HttpResponseHandler() {
+    /**
+     * get HttpResponseHandler
+     */
+    // tslint:disable-next-line:typedef
+    get HttpResponseHandler() {
         return this._httpResponseHandler;
     }
 
-    static get Filters() {
+    /**
+     * get registered filters
+     */
+    // tslint:disable-next-line:typedef
+    get Filters() {
         return this._filters;
     }
 
-    public static addFilter (filter: IFilter) {
+    /**
+     * register global filters
+     * @param filter - class that implemented interface IFilter
+     */
+    public addFilter (filter: IFilter): void {
         this._filters.push(filter);
     }
 
-    static get HttpRequestHandler() {
+    /**
+     * get HttpRequestHandler
+     */
+    // tslint:disable-next-line:typedef
+    get HttpRequestHandler() {
         return this._httpRrequestHandler;
     }
 
-    static set HttpRequestHandler(httpRequestHandler: IHttpRequestHandler) {
+    /**
+     * set HttpRequestHandler
+     * @param httpRequestHandler - class that implemented interface IHttpRequestHandler
+     */
+    set HttpRequestHandler(httpRequestHandler: IHttpRequestHandler) {
         this._httpRrequestHandler = httpRequestHandler;
     }
 
-    static get routes() {
+    /**
+     * get registered api routes
+     */
+    // tslint:disable-next-line:typedef
+    get routes() {
         return this._routes;
     }
 
-    public static addRoutes(routes: IRoute[]) {
+    /**
+     * method to add api routes
+     * @param routes Route Object array
+     */
+    public addRoutes(routes: IRoute[]): void {
         this._routes = [...this._routes, ...routes];
     }
 }

@@ -1,4 +1,4 @@
-import { AuthPrinciple } from "./AuthPrinciple";
+import { AuthPrinciple } from "../lifecycle/security/AuthPrinciple";
 
 export class JwtAuthPrinciple extends AuthPrinciple {
 
