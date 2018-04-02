@@ -22,6 +22,7 @@ export function ApiMethodMapper(context: HttpContext): RouteDescriptor {
         mapQueryString(context, routeDescriptor);
         return routeDescriptor;
     }
+
     // find route with param
     const paramMapResult = mapParams(context, routeDescriptors, url);
     if (paramMapResult !== null) {

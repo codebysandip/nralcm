@@ -9,7 +9,9 @@ import { StatusCode } from "../../common/enums";
 
 describe("HttpResponse", () => {
     let request: Partial<Request> = {};
-    let response: Partial<Response> = {};
+    let response: Partial<Response> = {
+        getHeader: sinon.stub()
+    };
     let httpContext = new HttpContext(<Request>request, <Response>response);
 
     describe("send", () => {
@@ -46,13 +48,14 @@ describe("HttpResponse", () => {
             (httpResponseHandler.sendResponse as sinon.SinonStub).callsFake(mockResonse);
             let serverResponse = httpResponse.send(data, StatusCode.BadRequest, new Map<string, string>().set("demo", "value"));
             expect(serverResponse.statusCode).to.equal(StatusCode.BadRequest);
-            expect(serverResponse.header["demo"]).to.equal("value");
+            expect(serverResponse.getHeader("demo")).to.equal("value");
         });
     });
 });
 
 const mockResonse = (httpContext: HttpContext, httpResponseMessage: HttpResponseMessage<Object>) => {
-    let headerObj = {};
+    type header = { [key: string]: string };
+    let headerObj: header = {};
     if (httpResponseMessage.headers.size > 0) {
         for (let [key, value] of httpResponseMessage.headers) {
             headerObj[key] = value;
@@ -60,7 +63,13 @@ const mockResonse = (httpContext: HttpContext, httpResponseMessage: HttpResponse
     }
     let obj =  {
         statusCode: httpResponseMessage.statusCode,
-        header: headerObj
+        header: headerObj,
     };
+    Object.defineProperty(obj, "getHeader", {
+        writable: true,
+        value: function (key: string) {
+            return this.header[key];
+        }
+    });
     return obj;
 };

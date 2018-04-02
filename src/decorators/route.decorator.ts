@@ -36,7 +36,7 @@ export function Route(httpMethod: HttpMethod, route?: string) {
             }
         }
         const routeDescriptor: RouteDescriptor = {
-            route: route || "",
+            route: route || propertyKey,
             descriptor: descriptor,
             methodName: propertyKey,
             httpMethod: httpMethod

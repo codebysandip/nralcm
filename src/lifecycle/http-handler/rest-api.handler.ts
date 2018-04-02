@@ -77,6 +77,7 @@ export class RestApiHandler implements IHttpHandler {
                     throw new BadRequestException(context, modelValidationHandlerResult);
                 }
             }
+            console.log("args1", Reflect.getMetadata(Constants.metadata.args, context.controllerObject) as any[]);
 
             // custom filters execution
             const filterExecuter = new FilterExecuter(context, routeDescriptor, this.restApiConfiguration.Filters);
@@ -93,7 +94,9 @@ export class RestApiHandler implements IHttpHandler {
             const data = method.apply(context.controllerObject as Object, args);
             if (!context.response.headersSent) {
                 filterExecuter.executeAfterActionExceduted();
-                context.response.json(data);
+                if (!context.response.headersSent) {
+                    context.response.json(data);
+                }
             }
             return;
         } catch (e) {

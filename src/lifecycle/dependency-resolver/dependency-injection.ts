@@ -17,18 +17,16 @@ export class DependencyInjection {
      */
     public inject(): void {
         let targetObject: any = this.context.controller;
-        const targetObjectInstance = new targetObject();
 
         const constructorParameterTypes: any[] = Reflect.getMetadata("design:paramtypes", targetObject);
         if (constructorParameterTypes && constructorParameterTypes.length > 0) {
             const constructorParameters = getConstructorParameters(targetObject);
             constructorParameterTypes.forEach((val: any, index) => {
-                targetObjectInstance[constructorParameters[index]] = new val();
-                circularInjection(val, targetObjectInstance[constructorParameters[index]]);
+                this.context.controllerObject[constructorParameters[index]] = new val();
+                circularInjection(val, this.context.controllerObject[constructorParameters[index]]);
             });
-            targetObjectInstance["request"] = this.context.request;
-            targetObjectInstance["response"] = this.httpResponse;
-            this.context.controllerObject = targetObjectInstance;
+            this.context.controllerObject["request"] = this.context.request;
+            this.context.controllerObject["response"] = this.httpResponse;
         }
     }
 }

@@ -3,10 +3,8 @@ import { expect } from "chai";
 import * as sinon from "sinon";
 import { FilterExecuter, IFilter } from ".";
 import { Request, Response } from "express-serve-static-core";
-import { HttpContext, DependencyInjection, HttpResponse } from "..";
+import { HttpContext } from "..";
 import { RouteDescriptor, HttpMethod } from "../../common";
-import { ProductController } from "../../controllers/product.controller";
-import { getHttpResponse } from "../../common/functions";
 
 describe("FilterExecuter", () => {
     let request: Partial<Request> = {};
