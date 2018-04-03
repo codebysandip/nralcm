@@ -15,14 +15,14 @@ export class ProductController extends BaseController {
     }
 
     @Route(HttpMethod.GET)
-    public get(id: string, b: boolean, s: string, a: number, @Optional("object") o: number): Object {
+    public get(id: string, b: boolean, s: string, a: number, @Optional("object") o: number): void {
         const data = this.productRepository.getAllProducts();
         const httpResponseMessage = new HttpResponseMessage();
         httpResponseMessage.body = { data: data, id: id, b: b, s: s, a: a, o: o };
         httpResponseMessage.statusCode = StatusCode.Ok;
         httpResponseMessage.headers.set("SomeHeader", "value");
         httpResponseMessage.headers.set("header2", "value2");
-        return this.response.sendHttpResponse(httpResponseMessage);
+        this.response.sendHttpResponse(httpResponseMessage);
     }
 
     @Route(HttpMethod.GET, "/{id}/getProduct/{sd}")

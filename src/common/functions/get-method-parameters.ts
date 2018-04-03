@@ -1,7 +1,7 @@
 
 /**
  * Get method parameters names
- * @param target Method
+ * @param target Class
  * @param methodName name of Method
  * @returns Array of method parameters names
  */
