@@ -25,8 +25,9 @@ export class DependencyInjection {
                 this.context.controllerObject[constructorParameters[index]] = new val();
                 circularInjection(val, this.context.controllerObject[constructorParameters[index]]);
             });
-            this.context.controllerObject["request"] = this.context.request;
-            this.context.controllerObject["response"] = this.httpResponse;
         }
+        this.context.controllerObject["request"] = this.context.request;
+        this.context.controllerObject["response"] = this.httpResponse;
+
     }
 }

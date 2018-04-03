@@ -1,39 +1,40 @@
 import "mocha";
 import { expect } from "chai";
 import * as sinon from "sinon";
-import { ApiMethodMapper } from "./api-method-mapper";
-import { HttpContext } from "..";
+import { HttpContext, ControllerMapper, RestApiConfiguration } from "..";
 import { Request, Response } from "express-serve-static-core";
+import { IRoute } from "../../common";
 import { ProductController } from "../../controllers/product.controller";
-import { HttpMethod } from "../../common";
 import { NotFoundException } from "../../exceptions";
 
-describe("ApiMethodMapper", () => {
-    it("should return RouteDescriptor of get method", () => {
+describe("ControllerMapper", () => {
+    it("should map with specified route and must return route", () => {
         let request: Partial<Request> = {
-            url: "/api/product",
-            method: HttpMethod.GET
+            url: "api/product"
         };
         let response: Partial<Response> = {};
         let httpContext = new HttpContext(<Request>request, <Response>response);
-        httpContext.controller = ProductController;
-        let controller: any = ProductController
-        httpContext.controllerObject = new controller();
+        let routes: IRoute[] = [
+            { path: "product", controller: ProductController }
+        ];
+        let restApiConfiguration: Partial<RestApiConfiguration> = {
+            routes: routes
+        };
 
-        const routeDescriptor = ApiMethodMapper(httpContext);
-        expect(routeDescriptor.methodName).to.equal("get");
+        let route: IRoute = ControllerMapper(httpContext, <RestApiConfiguration>restApiConfiguration);
+        expect(route.path).to.equal("product");
     });
 
     it("should throw NotFoundException", () => {
         let request: Partial<Request> = {
-            url: "/api/product/getProductDetails/10",
-            method: HttpMethod.GET
+            url: "api/product1"
         };
         let response: Partial<Response> = {
             type: sinon.stub(),
             status: sinon.stub(),
             send: sinon.stub()
         };
+
         (response.type as sinon.SinonStub).callsFake(() => {
             return response;
         });
@@ -44,18 +45,21 @@ describe("ApiMethodMapper", () => {
         (response.send as sinon.SinonStub).callsFake(() => {
             return response;
         });
+
         let httpContext = new HttpContext(<Request>request, <Response>response);
-        httpContext.controller = ProductController;
-        let controller: any = ProductController
-        httpContext.controllerObject = new controller();
+        let routes: IRoute[] = [
+            { path: "product", controller: ProductController }
+        ]
+        let restApiConfiguration: Partial<RestApiConfiguration> = {
+            routes: routes
+        };
 
         try {
-            ApiMethodMapper(httpContext);
+            let route: IRoute = ControllerMapper(httpContext, <RestApiConfiguration>restApiConfiguration);
+            expect(route.path).to.equal("product");
         } catch (e) {
             expect(e).to.instanceof(NotFoundException);
-            return;
         }
-        throw new Error("Not passed test");
-    })
+    });
 
 });

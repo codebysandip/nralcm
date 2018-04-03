@@ -1,7 +1,8 @@
 import { Response } from "express-serve-static-core";
 import { IHttpResponseHandler } from ".";
 import { HttpContext, HttpResponseMessage } from "..";
-import { StatusCode } from "../../common/enums";
+// import { StatusCode } from "../../common/enums";
+import { ResponseData } from "../../common/models";
 
 /**
  * DefaultHttpResponseHandler will be used when HttpResponseHandler not registered in RestApiConfiguration
@@ -18,21 +19,25 @@ export class DefaultHttpResponseHandler implements IHttpResponseHandler {
                 context.response.setHeader(key, value);
             }
         }
+        let responseData: ResponseData =  {
+            data: httpResponseMessage.body,
+            statusCode: httpResponseMessage.statusCode,
+            successMessage: httpResponseMessage.successMessage,
+            errorMessage: httpResponseMessage.errorMessages
+        };
         return context.response.type("application/json").status(httpResponseMessage.statusCode)
-            .send(this.isSuccess(httpResponseMessage.statusCode) ?
-                (httpResponseMessage.body || { message: httpResponseMessage.successMessage }) :
-                { message: httpResponseMessage.errorMessages });
+            .send(responseData);
     }
 
     /**
      * Method to check success or error response based on StatusCode
      * @param statusCode StatusCode
      */
-    private isSuccess(statusCode: StatusCode): boolean {
-        if ((statusCode.toString() as string).startsWith("2")) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+    // private isSuccess(statusCode: StatusCode): boolean {
+    //     if ((statusCode.toString() as string).startsWith("2")) {
+    //         return true;
+    //     } else {
+    //         return false;
+    //     }
+    // }
 }

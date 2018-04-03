@@ -14,6 +14,7 @@ export class AuthHandler implements IAuthHandler {
 
     constructor(private restApiConfiguration: RestApiConfiguration) {
     }
+
     /**
      * Method to process authentication
      * and authorization

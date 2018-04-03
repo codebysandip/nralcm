@@ -77,13 +77,12 @@ export class RestApiHandler implements IHttpHandler {
                     throw new BadRequestException(context, modelValidationHandlerResult);
                 }
             }
-            console.log("args1", Reflect.getMetadata(Constants.metadata.args, context.controllerObject) as any[]);
 
             // custom filters execution
             const filterExecuter = new FilterExecuter(context, routeDescriptor, this.restApiConfiguration.Filters);
             filterExecuter.executeBeforeActionExceduted();
 
-            let httpResponse = getHttpResponse(context, this.restApiConfiguration.HttpResponseHandler)
+            let httpResponse = getHttpResponse(context)
             // Resolve Dependency of Controller
             let di = new DependencyInjection(context, httpResponse);
             di.inject()
@@ -95,7 +94,10 @@ export class RestApiHandler implements IHttpHandler {
             if (!context.response.headersSent) {
                 filterExecuter.executeAfterActionExceduted();
                 if (!context.response.headersSent) {
-                    context.response.json(data);
+                    if (!context.httpResponseMessage) {
+                        context.controllerObject.response.send(data);
+                    }
+                    this.restApiConfiguration.HttpResponseHandler.sendResponse(context, context.httpResponseMessage);
                 }
             }
             return;
