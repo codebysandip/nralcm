@@ -1,6 +1,6 @@
-import { HttpResponse, HttpContext, IHttpResponseHandler } from "../../lifecycle";
+import { HttpResponse, HttpContext } from "../../lifecycle";
 
-export function getHttpResponse(context: HttpContext, httpResponseHandler: IHttpResponseHandler) {
-    let httpResponse = new HttpResponse(context, httpResponseHandler);
+export function getHttpResponse(context: HttpContext) {
+    let httpResponse = new HttpResponse(context);
     return httpResponse;
 }

@@ -1,5 +1,5 @@
 import { Request, Response } from "express-serve-static-core";
-import { AuthPrinciple } from "..";
+import { AuthPrinciple, HttpResponseMessage } from "..";
 import { RouteDescriptor } from "../../common";
 
 /**
@@ -12,6 +12,7 @@ export class HttpContext {
     public controllerObject: any;
     public user: AuthPrinciple;
     public routeDescriptor: RouteDescriptor;
+    public httpResponseMessage: HttpResponseMessage<any>;
 
     constructor(req: Request, res: Response) {
         this.request = req;

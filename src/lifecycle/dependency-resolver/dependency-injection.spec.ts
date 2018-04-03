@@ -14,6 +14,8 @@ describe("DependencyInjection", () => {
     describe("inject", () => {
         it("should inject dependency of DemoRepository in DemoController", () => {
             httpContext.controller = DemoController;
+            let obj: any = DemoController;
+            httpContext.controllerObject = new obj();
             // let httpResponseHandler: Partial<IHttpResponseHandler> = {
             //     sendResponse: sinon.stub()
             // };
