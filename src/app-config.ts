@@ -9,11 +9,8 @@ export class AppConfig {
     constructor (private restApiConfiguration: RestApiConfiguration) {
     }
     public register(): void {
-        HttpConfiguration.addHandler("/api/*", new RestApiHandler(this.restApiConfiguration));
-
         this.restApiConfiguration.AuthenticationFilter = new AuthenticationFilter();
         this.restApiConfiguration.AuthorizeFilter = new AuthorizationFilter();
-        this.restApiConfiguration.ModelValidationHandler = new ModelValidationHandler();
         this.restApiConfiguration.addFilter(new GlobalFilter());
         this.restApiConfiguration.addRoutes(routes);
     }

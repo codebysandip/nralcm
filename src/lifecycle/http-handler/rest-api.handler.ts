@@ -1,5 +1,5 @@
 import { IHttpHandler } from "./IHttpHandler";
-import { HttpContext, DefaultHttpResponseHandler, ExceptionHandler, AuthHandler } from "..";
+import { HttpContext, DefaultHttpResponseHandler, ExceptionHandler, AuthHandler, ModelValidationHandler } from "..";
 import "reflect-metadata/Reflect";
 import { RestApiConfiguration } from "../config";
 import { getContext, getHttpResponse } from "../../common/functions";
@@ -30,6 +30,10 @@ export class RestApiHandler implements IHttpHandler {
 
         if (!this.restApiConfiguration.AuthHandler) {
             this.restApiConfiguration.AuthHandler = new AuthHandler(this.restApiConfiguration);
+        }
+
+        if (!this.restApiConfiguration.ModelValidationHandler) {
+            this.restApiConfiguration.ModelValidationHandler = new ModelValidationHandler();
         }
     }
     /**
@@ -88,7 +92,7 @@ export class RestApiHandler implements IHttpHandler {
             di.inject()
             // get arugments array to call api method
             const args = Reflect.getMetadata(Constants.metadata.args, context.controllerObject) as any[];
-
+            console.log("args", args);
             const method = routeDescriptor.descriptor.value;
             const data = method.apply(context.controllerObject as Object, args);
             if (!context.response.headersSent) {
