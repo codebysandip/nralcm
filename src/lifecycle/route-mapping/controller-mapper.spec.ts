@@ -1,7 +1,7 @@
 import "mocha";
 import { expect } from "chai";
 import * as sinon from "sinon";
-import { HttpContext, ControllerMapper, RestApiConfiguration } from "..";
+import { HttpContext, ControllerMapper, RestApiConfiguration, IHttpResponseHandler } from "..";
 import { Request, Response } from "express-serve-static-core";
 import { IRoute } from "../../common";
 import { ProductController } from "../../controllers/product.controller";
@@ -50,8 +50,13 @@ describe("ControllerMapper", () => {
         let routes: IRoute[] = [
             { path: "product", controller: ProductController }
         ]
+
+        let httpResponseHandler: Partial<IHttpResponseHandler> = {
+            sendResponse: sinon.stub()
+        };
         let restApiConfiguration: Partial<RestApiConfiguration> = {
-            routes: routes
+            routes: routes,
+            HttpResponseHandler: <IHttpResponseHandler>httpResponseHandler
         };
 
         try {

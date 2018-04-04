@@ -1,7 +1,7 @@
 import "mocha";
 import { expect } from "chai";
 import * as sinon from "sinon";
-import { HttpContext, RestApiConfiguration, AuthHandler } from "..";
+import { HttpContext, RestApiConfiguration, AuthHandler, IHttpResponseHandler } from "..";
 import { Request, Response } from "express-serve-static-core";
 import { ProductController } from "../../controllers/product.controller";
 import { AuthenticationFilter } from "../../filters/authentication.filter";
@@ -48,8 +48,13 @@ describe("AuthHandler", () => {
 
         let httpContext = new HttpContext(<Request>request, <Response>response);
         httpContext.controller = ProductController;
+
+        let httpResponseHandler: Partial<IHttpResponseHandler> = {
+            sendResponse: sinon.stub()
+        };
         let restApiConfiguration: Partial<RestApiConfiguration> = {
-            AuthenticationFilter: new AuthenticationFilter()
+            AuthenticationFilter: new AuthenticationFilter(),
+            HttpResponseHandler: <IHttpResponseHandler>httpResponseHandler
         };
 
         let authHandler = new AuthHandler(<RestApiConfiguration>restApiConfiguration);

@@ -63,14 +63,14 @@ export class RestApiHandler implements IHttpHandler {
             }
 
             // Mapping request with api method
-            const routeDescriptor = ApiMethodMapper(context);
+            const routeDescriptor = ApiMethodMapper(context, this.restApiConfiguration);
             context.routeDescriptor = routeDescriptor;
 
             // sending request to Auth handler
             if (this.restApiConfiguration.AuthHandler) {
                 const authResult = this.restApiConfiguration.AuthHandler.handle(context);
                 if (!authResult) {
-                    throw new UnAuthenticateException(context);
+                    throw new UnAuthenticateException(context, this.restApiConfiguration);
                 }
             }
 
@@ -78,7 +78,7 @@ export class RestApiHandler implements IHttpHandler {
             if (this.restApiConfiguration.ModelValidationHandler) {
                 const modelValidationHandlerResult = this.restApiConfiguration.ModelValidationHandler.validate(context, routeDescriptor);
                 if (modelValidationHandlerResult.length && !context.response.headersSent) {
-                    throw new BadRequestException(context, modelValidationHandlerResult);
+                    throw new BadRequestException(context, modelValidationHandlerResult, this.restApiConfiguration);
                 }
             }
 
@@ -92,7 +92,6 @@ export class RestApiHandler implements IHttpHandler {
             di.inject()
             // get arugments array to call api method
             const args = Reflect.getMetadata(Constants.metadata.args, context.controllerObject) as any[];
-            console.log("args", args);
             const method = routeDescriptor.descriptor.value;
             const data = method.apply(context.controllerObject as Object, args);
             if (!context.response.headersSent) {

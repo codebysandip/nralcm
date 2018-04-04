@@ -30,7 +30,7 @@ export class AuthHandler implements IAuthHandler {
             const authResult = this.restApiConfiguration.AuthenticationFilter.authenticate(context);
             if (!authResult) {
                 if (!context.response.headersSent) {
-                    throw new UnAuthenticateException(context);
+                    throw new UnAuthenticateException(context, this.restApiConfiguration);
                 }
             } else {
                 if (authorize.roles && authorize.roles.length > 0 && this.restApiConfiguration.AuthorizeFilter) {
