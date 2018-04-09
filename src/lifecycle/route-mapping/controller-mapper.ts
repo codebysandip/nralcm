@@ -15,7 +15,7 @@ export function ControllerMapper(context: HttpContext, restApiConfiguration: Res
     if (route && urlParts.length >= 1) {
         return route;
     }
-    throw new NotFoundException(context);
+    throw new NotFoundException(context, restApiConfiguration);
 }
 
 /**

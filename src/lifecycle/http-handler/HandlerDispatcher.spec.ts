@@ -23,9 +23,14 @@ describe("HandlerDispatcher", () => {
             (handler.processRequest as sinon.SinonStub).callsFake((req: Request) => {
                 req.statusCode = 201
             });
-            HttpConfiguration.addHandler("/api/*", <IHttpHandler>handler);
+            let httpConfiguration: Partial<HttpConfiguration> = {
+                getHandler: sinon.stub()
+            };
 
-            HandlerDispatcher.processHandler(<Request>request, <Response>response);
+            (httpConfiguration.getHandler as sinon.SinonStub).callsFake(() => {
+                return ["/api/*", handler];
+            });
+            HandlerDispatcher.processHandler(<Request>request, <Response>response, <HttpConfiguration>httpConfiguration);
 
             expect(request.statusCode).to.equal(201);
         });
@@ -59,11 +64,16 @@ describe("HandlerDispatcher", () => {
             (handler.processRequest as sinon.SinonStub).callsFake((req: Request) => {
                 req.statusCode = 201;
             });
-            HttpConfiguration.addHandler("/api/*", <IHttpHandler>handler);
+            let httpConfiguration: Partial<HttpConfiguration> = {
+                getHandler: sinon.stub()
+            };
+            (httpConfiguration.getHandler as sinon.SinonStub).callsFake(() => {
+                return undefined;
+            });
             let httpContext = new HttpContext(<Request>request, <Response>response);
 
             try {
-                HandlerDispatcher.processHandler(<Request>request, <Response>response, httpContext);
+                HandlerDispatcher.processHandler(<Request>request, <Response>response, <HttpConfiguration>httpConfiguration, httpContext);
                 expect(request.statusCode).to.equal(201);
             } catch (e) {
                 console.log(e);
