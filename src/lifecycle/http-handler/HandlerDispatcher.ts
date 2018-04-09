@@ -15,8 +15,8 @@ export class HandlerDispatcher {
      * @param request Request Object
      * @param response Response Object
      */
-    public static processHandler(request: Request, response: Response, context?: HttpContext): void {
-        const matchedHandler = HttpConfiguration.getHandler(request.url);
+    public static processHandler(request: Request, response: Response, httpConfiguration: HttpConfiguration, context?: HttpContext): void {
+        const matchedHandler = httpConfiguration.getHandler(request.url);
         if (matchedHandler && matchedHandler[1]) {
             matchedHandler[1].processRequest(request, response);
         } else {

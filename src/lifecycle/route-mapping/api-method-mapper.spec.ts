@@ -2,7 +2,7 @@ import "mocha";
 import { expect } from "chai";
 import * as sinon from "sinon";
 import { ApiMethodMapper } from "./api-method-mapper";
-import { HttpContext } from "..";
+import { HttpContext, RestApiConfiguration, IHttpResponseHandler } from "..";
 import { Request, Response } from "express-serve-static-core";
 import { ProductController } from "../../controllers/product.controller";
 import { HttpMethod } from "../../common";
@@ -19,8 +19,9 @@ describe("ApiMethodMapper", () => {
         httpContext.controller = ProductController;
         let controller: any = ProductController
         httpContext.controllerObject = new controller();
+        let restApiConfig: Partial<RestApiConfiguration> = {};
 
-        const routeDescriptor = ApiMethodMapper(httpContext);
+        const routeDescriptor = ApiMethodMapper(httpContext, <RestApiConfiguration>restApiConfig);
         expect(routeDescriptor.methodName).to.equal("get");
     });
 
@@ -48,9 +49,15 @@ describe("ApiMethodMapper", () => {
         httpContext.controller = ProductController;
         let controller: any = ProductController
         httpContext.controllerObject = new controller();
+        let httpResponseHandler: Partial<IHttpResponseHandler> = {
+            sendResponse: sinon.stub()
+        };
+        let restApiConfig: Partial<RestApiConfiguration> = {
+            HttpResponseHandler: <IHttpResponseHandler>httpResponseHandler
+        };
 
         try {
-            ApiMethodMapper(httpContext);
+            ApiMethodMapper(httpContext, <RestApiConfiguration>restApiConfig);
         } catch (e) {
             expect(e).to.instanceof(NotFoundException);
             return;

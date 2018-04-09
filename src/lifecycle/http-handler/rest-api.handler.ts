@@ -1,5 +1,5 @@
 import { IHttpHandler } from "./IHttpHandler";
-import { HttpContext, DefaultHttpResponseHandler, ExceptionHandler, AuthHandler } from "..";
+import { HttpContext, DefaultHttpResponseHandler, ExceptionHandler, AuthHandler, ModelValidationHandler } from "..";
 import "reflect-metadata/Reflect";
 import { RestApiConfiguration } from "../config";
 import { getContext, getHttpResponse } from "../../common/functions";
@@ -31,6 +31,10 @@ export class RestApiHandler implements IHttpHandler {
         if (!this.restApiConfiguration.AuthHandler) {
             this.restApiConfiguration.AuthHandler = new AuthHandler(this.restApiConfiguration);
         }
+
+        if (!this.restApiConfiguration.ModelValidationHandler) {
+            this.restApiConfiguration.ModelValidationHandler = new ModelValidationHandler();
+        }
     }
     /**
      * Process request of rest api
@@ -59,14 +63,14 @@ export class RestApiHandler implements IHttpHandler {
             }
 
             // Mapping request with api method
-            const routeDescriptor = ApiMethodMapper(context);
+            const routeDescriptor = ApiMethodMapper(context, this.restApiConfiguration);
             context.routeDescriptor = routeDescriptor;
 
             // sending request to Auth handler
             if (this.restApiConfiguration.AuthHandler) {
                 const authResult = this.restApiConfiguration.AuthHandler.handle(context);
                 if (!authResult) {
-                    throw new UnAuthenticateException(context);
+                    throw new UnAuthenticateException(context, this.restApiConfiguration);
                 }
             }
 
@@ -74,7 +78,7 @@ export class RestApiHandler implements IHttpHandler {
             if (this.restApiConfiguration.ModelValidationHandler) {
                 const modelValidationHandlerResult = this.restApiConfiguration.ModelValidationHandler.validate(context, routeDescriptor);
                 if (modelValidationHandlerResult.length && !context.response.headersSent) {
-                    throw new BadRequestException(context, modelValidationHandlerResult);
+                    throw new BadRequestException(context, modelValidationHandlerResult, this.restApiConfiguration);
                 }
             }
 
@@ -88,7 +92,6 @@ export class RestApiHandler implements IHttpHandler {
             di.inject()
             // get arugments array to call api method
             const args = Reflect.getMetadata(Constants.metadata.args, context.controllerObject) as any[];
-
             const method = routeDescriptor.descriptor.value;
             const data = method.apply(context.controllerObject as Object, args);
             if (!context.response.headersSent) {
