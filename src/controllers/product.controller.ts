@@ -6,6 +6,7 @@ import { HttpMethod } from "../common";
 import { Optional } from "../validators";
 import { TestFilter } from "../filters/test.filter";
 import { StatusCode } from "../common/enums";
+import { Observable } from "rxjs/Observable";
 
 @Controller()
 @Authorize(["Manager"])
@@ -51,5 +52,10 @@ export class ProductController extends BaseController {
     @FilterDecorator(new TestFilter())
     public testFilter() {
         return { message: "filter test" };
+    }
+
+    @Route(HttpMethod.GET)
+    public getOb(): Observable<number> {
+        return this.productRepository.obsProduct();
     }
 }

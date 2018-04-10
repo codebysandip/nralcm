@@ -34,7 +34,7 @@ describe("DefaultHttpResponseHandler", () => {
             });
 
             let res = responseHandler.sendResponse(httpContext, <HttpResponseMessage<any>>httpResponseMessage);
-            expect(res.statusCode).to.equal(StatusCode.Ok);
+            expect((res as Response).statusCode).to.equal(StatusCode.Ok);
         });
     });
 })
