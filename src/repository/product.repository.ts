@@ -10,14 +10,13 @@ export class ProductRepository {
 
     public getAllProducts(): Object {
         this.someClass.print();
-        return [{ id: 1, name: "one plus"}];
+        return [{ id: 1, name: "one plus" }];
     }
 
     public obsProduct(): Observable<number> {
         return Observable.create((obs: Observer<number>) => {
-            setTimeout(() => {
-                obs.next(10);
-            }, 100);
+            // throw new Error(`some error ${obs}`);
+            obs.next(10);
         });
     }
 }

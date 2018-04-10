@@ -30,9 +30,10 @@ export class DefaultHttpResponseHandler implements IHttpResponseHandler {
         if (context.isObservableResponse) {
             (context.httpResponseMessage.body as Observable<T>).subscribe(data => {
                 context.httpResponseMessage.body = data;
-                console.log("result1", context.httpResponseMessage.body);
                 return context.response.type("application/json").status(httpResponseMessage.statusCode)
                 .json(data);
+            }, error => {
+                throw error;
             });
             // let result = (context.httpResponseMessage.body as Observable<T>).toPromise();//(result => {
             // result.then(data => console.log("data", data)).catch(err => console.log("errror", err));
