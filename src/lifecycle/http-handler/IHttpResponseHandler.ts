@@ -12,5 +12,5 @@ export interface IHttpResponseHandler {
      * @param context HttpContext Object
      * @param httpResponseMessage HttpResponseMessage Object
      */
-    sendResponse<T>(context: HttpContext, httpResponseMessage: HttpResponseMessage<T>): Response;
+    sendResponse<T>(context: HttpContext, httpResponseMessage: HttpResponseMessage<T>): Response|void;
 }

@@ -1,9 +1,8 @@
-import { HttpConfiguration, RestApiConfiguration, ModelValidationHandler } from "./lifecycle";
+import { RestApiConfiguration } from "./lifecycle";
 import { AuthenticationFilter } from "./filters/authentication.filter";
 import { AuthorizationFilter } from "./filters/authorize.filter";
-import { GlobalFilter } from "./filters/global.filter";
+// import { GlobalFilter } from "./filters/global.filter";
 import { routes } from "./app.routes";
-import { RestApiHandler } from "./lifecycle";
 
 export class AppConfig {
     constructor (private restApiConfiguration: RestApiConfiguration) {
@@ -11,7 +10,7 @@ export class AppConfig {
     public register(): void {
         this.restApiConfiguration.AuthenticationFilter = new AuthenticationFilter();
         this.restApiConfiguration.AuthorizeFilter = new AuthorizationFilter();
-        this.restApiConfiguration.addFilter(new GlobalFilter());
+        // this.restApiConfiguration.addFilter(new GlobalFilter());
         this.restApiConfiguration.addRoutes(routes);
     }
 
