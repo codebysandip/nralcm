@@ -1,6 +1,6 @@
 {
   "name": "nralcm",
-  "version": "1.0.0-alpha-2.4",
+  "version": "1.0.0-alpha-2.6",
   "description": "This is a framework based on NodeJs to manage rest api request lifecycle",
   "keywords": [
     "node-typescript",
@@ -11,6 +11,7 @@
   "scripts": {
     "test": "mocha -r ts-node/register src/**/*.spec.ts",
     "start": "nodemon",
+    "build": "rm -rf ../nralcm-npm/* && cp package.json README.md ../nralcm-npm/ && tsc",
     "lint": "npm run tslint \"src/**/*.ts\"",
     "tslint": "tslint"
   },
