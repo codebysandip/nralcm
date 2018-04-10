@@ -27,7 +27,6 @@ describe("FilterExecuter", () => {
             httpContext.controllerObject = {};
             let fe = new FilterExecuter(httpContext, <RouteDescriptor>routeDescriptor, globalFilters);
             (testFilter.beforeActionExceduted as sinon.SinonStub).callsFake((context, descriptor: RouteDescriptor) => {
-                console.log(context);
                 expect(descriptor.httpMethod).to.equal(HttpMethod.GET);
             });
             fe.executeBeforeActionExceduted();
@@ -52,7 +51,6 @@ describe("FilterExecuter", () => {
             httpContext.controllerObject = {};
             let fe = new FilterExecuter(httpContext, <RouteDescriptor>routeDescriptor, globalFilters);
             (testFilter.aftereActionExceduted as sinon.SinonStub).callsFake((context, descriptor: RouteDescriptor) => {
-                console.log(context);
                 expect(descriptor.httpMethod).to.equal(HttpMethod.GET);
             });
             fe.executeBeforeActionExceduted();

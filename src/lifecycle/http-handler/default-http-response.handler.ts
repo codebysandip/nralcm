@@ -3,8 +3,7 @@ import { IHttpResponseHandler } from ".";
 import { HttpContext, HttpResponseMessage } from "..";
 // import { StatusCode } from "../../common/enums";
 import { ResponseData } from "../../common/models";
-import { Observable } from "rxjs/Observable";
-import 'rxjs/add/operator/toPromise';
+import * as Rx from "rxjs";
 /**
  * DefaultHttpResponseHandler will be used when HttpResponseHandler not registered in RestApiConfiguration
  */
@@ -27,20 +26,16 @@ export class DefaultHttpResponseHandler implements IHttpResponseHandler {
             successMessage: httpResponseMessage.successMessage,
             errorMessage: httpResponseMessage.errorMessages
         };
-        if (context.isObservableResponse) {
-            (context.httpResponseMessage.body as Observable<T>).subscribe(data => {
-                context.httpResponseMessage.body = data;
+        if (context.isObservableResponse && context.httpResponseMessage.body instanceof Rx.Observable) {
+            (context.httpResponseMessage.body as Rx.Observable<T>).take(1).subscribe(data => {
+                responseData.data = data;
+                // if (resp$)
+                //     resp$.unsubscribe();
                 return context.response.type("application/json").status(httpResponseMessage.statusCode)
                 .json(data);
             }, error => {
                 throw error;
             });
-            // let result = (context.httpResponseMessage.body as Observable<T>).toPromise();//(result => {
-            // result.then(data => console.log("data", data)).catch(err => console.log("errror", err));
-            // console.log("result", result);
-            // context.httpResponseMessage.body = result;
-            
-            // });
         } else {
             return context.response.type("application/json").status(httpResponseMessage.statusCode)
                 .send(responseData);

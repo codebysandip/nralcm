@@ -76,7 +76,6 @@ describe("HandlerDispatcher", () => {
                 HandlerDispatcher.processHandler(<Request>request, <Response>response, <HttpConfiguration>httpConfiguration, httpContext);
                 expect(request.statusCode).to.equal(201);
             } catch (e) {
-                console.log(e);
                 expect(e).to.instanceof(HandlerNotFoundException);
             }
 
