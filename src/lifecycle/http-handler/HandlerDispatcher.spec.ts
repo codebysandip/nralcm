@@ -3,7 +3,6 @@ import { expect } from "chai";
 import * as sinon from "sinon";
 import { HttpConfiguration, IHttpHandler, HandlerDispatcher, HttpContext } from "..";
 import { Request, Response } from "express-serve-static-core";
-import { HandlerNotFoundException } from "../../exceptions";
 import { HttpMethod } from "../../common";
 
 describe("HandlerDispatcher", () => {
@@ -35,7 +34,7 @@ describe("HandlerDispatcher", () => {
             expect(request.statusCode).to.equal(201);
         });
 
-        it("should process registered handler and throw HandlerNotFoundException", () => {
+        it("should process registered handler and should return BadRequest", () => {
             let request: Partial<Request> = {
                 url: "/product",
                 method: HttpMethod.GET
@@ -72,12 +71,9 @@ describe("HandlerDispatcher", () => {
             });
             let httpContext = new HttpContext(<Request>request, <Response>response);
 
-            try {
-                HandlerDispatcher.processHandler(<Request>request, <Response>response, <HttpConfiguration>httpConfiguration, httpContext);
-                expect(request.statusCode).to.equal(201);
-            } catch (e) {
-                expect(e).to.instanceof(HandlerNotFoundException);
-            }
+            HandlerDispatcher.processHandler(<Request>request, <Response>response, <HttpConfiguration>httpConfiguration, httpContext);
+            console.log("ssad")
+            expect(response.statusCode).to.equal(400);
 
         });
 

@@ -70,7 +70,7 @@ export class RestApiHandler implements IHttpHandler {
             if (this.restApiConfiguration.AuthHandler) {
                 const authResult = this.restApiConfiguration.AuthHandler.handle(context);
                 if (!authResult) {
-                    throw new UnAuthenticateException(context, this.restApiConfiguration);
+                    throw new UnAuthenticateException();
                 }
             }
 
@@ -78,7 +78,8 @@ export class RestApiHandler implements IHttpHandler {
             if (this.restApiConfiguration.ModelValidationHandler) {
                 const modelValidationHandlerResult = this.restApiConfiguration.ModelValidationHandler.validate(context, routeDescriptor);
                 if (modelValidationHandlerResult.length && !context.response.headersSent) {
-                    throw new BadRequestException(context, modelValidationHandlerResult, this.restApiConfiguration);
+                    // throw new BadRequestException(context, modelValidationHandlerResult, this.restApiConfiguration);
+                    throw new BadRequestException(modelValidationHandlerResult.map(val => val.errorMessage));
                 }
             }
 
@@ -103,11 +104,17 @@ export class RestApiHandler implements IHttpHandler {
                     this.restApiConfiguration.HttpResponseHandler.sendResponse(context, context.httpResponseMessage);
                 }
             }
-            return;
+            return;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
         } catch (e) {
-            if (this.restApiConfiguration.ExceptionHandler && !context.response.headersSent) {
-                this.restApiConfiguration.ExceptionHandler.handleException(context, e);
+            if (e && e.constructor && e.constructor.name === "Error") {
+                if (this.restApiConfiguration.ExceptionHandler && !context.response.headersSent) {
+                    this.restApiConfiguration.ExceptionHandler.handleException(context, e);
+                }
+            } else {
+                if (e && e.httpResponseMessage && !context.response.headersSent) {
+                    this.restApiConfiguration.HttpResponseHandler.sendResponse(context, e.httpResponseMessage);
+                }
             }
-        }
+        }                                                                                                   
     }
 }

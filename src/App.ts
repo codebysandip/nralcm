@@ -2,9 +2,7 @@ import * as express from "express";
 import { HandlerDispatcher, RestApiConfiguration, HttpConfiguration } from "./lifecycle";
 import * as bodyparser from "body-parser";
 import { Request, Response } from "express-serve-static-core";
-import { getContext } from "./common/functions";
 import { AppConfig } from "./app-config";
-import { SyntaxErrorException } from "./exceptions";
 
 class App {
     public express: express.Express;
@@ -17,11 +15,11 @@ class App {
         this.express.use(bodyparser.json());
         new AppConfig(this.restApiConfiguration).register();
 
-        this.express.use((err: any, req: Request, res: Response, next: any): void|SyntaxErrorException => {
+        this.express.use((err: any, req: Request, res: Response, next: any): void|Response => {
             if (err) {
                 if (err instanceof SyntaxError) {
                     // console.log("syntax err");
-                    return new SyntaxErrorException(getContext(req, res));
+                    return res.type("application/json").status(400).send({ message: "Invalid Json Body" });;
                 }
                 console.log(err);
                 return;

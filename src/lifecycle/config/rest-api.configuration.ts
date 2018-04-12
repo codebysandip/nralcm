@@ -7,6 +7,7 @@ import { IModelValidation } from "../validation";
 import { IFilter } from "../filter";
 import { IHttpRequestHandler } from "../http-handler";
 import { IRoute } from "../../common";
+
 /**
  * RestApiConfiguration class provides property and methods to configure Rest api
  */

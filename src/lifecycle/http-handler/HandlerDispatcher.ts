@@ -1,6 +1,5 @@
 import { Response, Request } from "express";
 import { HttpConfiguration } from "../config";
-import { HandlerNotFoundException } from "../../exceptions";
 import { getContext } from "../../common";
 import { HttpContext } from "..";
 
@@ -26,7 +25,7 @@ export class HandlerDispatcher {
             } else {
                 httpContext = getContext(request, response);
             }
-            throw new HandlerNotFoundException(httpContext);
+            httpContext.response.type("application/json").status(400).json({ message: "There is no handler supported for the request"});
         }
     }
 
