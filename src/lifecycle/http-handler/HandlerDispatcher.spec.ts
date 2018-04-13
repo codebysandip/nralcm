@@ -72,7 +72,6 @@ describe("HandlerDispatcher", () => {
             let httpContext = new HttpContext(<Request>request, <Response>response);
 
             HandlerDispatcher.processHandler(<Request>request, <Response>response, <HttpConfiguration>httpConfiguration, httpContext);
-            console.log("ssad")
             expect(response.statusCode).to.equal(400);
 
         });

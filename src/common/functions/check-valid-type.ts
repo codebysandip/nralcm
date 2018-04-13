@@ -21,6 +21,10 @@ export function isValidType(type: Function, value: any): boolean {
     if (type.name === "Array") {
         return checkValidArray(value);
     }
+
+    if (type.constructor && type.constructor.name === "Date") {
+        return Date.parse(value) !== NaN
+    }
     try {
         JSON.parse(JSON.stringify(value));
         return true;

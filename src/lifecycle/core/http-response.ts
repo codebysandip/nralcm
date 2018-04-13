@@ -1,7 +1,6 @@
 import { HttpContext } from "./http-context";
 import { HttpResponseMessage } from ".";
 import { StatusCode } from "../../common/enums";
-import { Observable } from "rxjs/Observable";
 
 /**
  * HttpResponse class have instance members to send response from api method
@@ -23,9 +22,6 @@ export class HttpResponse {
      * @param headers Headers to be sent
      */
     public send<T>(body: T, statusCode?: StatusCode, headers?: Map<string, string>): void {
-        if (body instanceof Observable) {
-            this._context.isObservableResponse = true;
-        }
         this._body = body;
         this._statusCode = statusCode || StatusCode.Ok;
         this._headers = headers || new Map<string, string>();

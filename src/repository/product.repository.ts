@@ -2,7 +2,7 @@ import { SomeClass } from "./some.repository";
 import { Repository } from "../decorators";
 import { Observable } from "rxjs/Observable";
 import { Observer } from "rxjs/Observer";
-import { BadRequestException } from "../exceptions";
+// import { BadRequestException } from "../exceptions";
 
 @Repository()
 export class ProductRepository {
@@ -16,8 +16,8 @@ export class ProductRepository {
 
     public obsProduct(): Observable<number> {
         return Observable.create((obs: Observer<number>) => {
-            throw new BadRequestException([`some error ${obs}`]);
-            // obs.next(10);
+            // obs.error(`some error ${obs}`);
+            obs.next(10);
         });
     }
 }

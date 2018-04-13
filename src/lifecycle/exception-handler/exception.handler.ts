@@ -13,7 +13,7 @@ export class ExceptionHandler implements IExceptionHandler {
      */
     public handleException(context: HttpContext, exception: any): void {
         // log your exception
-        console.log("Stack", exception.stack);
+        // console.log("Stack", exception.stack);
         context.response.type("application/json").status(StatusCode.InternalServerError).send({ message: "Oops! Something went wrong. Please try after sometime."});
         return;
     }
