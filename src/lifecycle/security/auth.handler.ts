@@ -30,14 +30,14 @@ export class AuthHandler implements IAuthHandler {
             const authResult = this.restApiConfiguration.AuthenticationFilter.authenticate(context);
             if (!authResult) {
                 if (!context.response.headersSent) {
-                    throw new UnAuthenticateException(context, this.restApiConfiguration);
+                    throw new UnAuthenticateException();
                 }
             } else {
                 if (authorize.roles && authorize.roles.length > 0 && this.restApiConfiguration.AuthorizeFilter) {
                     if (context.user && context.user.isAuthenticated) {
                         const isAuthorized = this.restApiConfiguration.AuthorizeFilter.authorize(context, authorize.roles);
                         if (!isAuthorized && !context.response.headersSent) {
-                            throw new UnAuthorizeException(context);
+                            throw new UnAuthorizeException();
                         }
                     } else {
                         context.response.type("application/json").status(500).send({ message: "HttpContext.user is null. Create a new class and extend AuthPrinciple. Inject object of class in HttpContext.user."});

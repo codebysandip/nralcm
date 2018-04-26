@@ -1,6 +1,6 @@
 import { IExceptionHandler } from "./IExceptionHandler";
 import { HttpContext } from "..";
-import { ServerErrorException } from "../../exceptions";
+import { StatusCode } from "../../common/enums";
 
 /**
  * Default ExceptionHandler to handle all expceptions in rest api
@@ -13,8 +13,8 @@ export class ExceptionHandler implements IExceptionHandler {
      */
     public handleException(context: HttpContext, exception: any): void {
         // log your exception
-        console.log("Stack", exception.stack);
-        new ServerErrorException(context);
+        // console.log("Stack", exception.stack);
+        context.response.type("application/json").status(StatusCode.InternalServerError).send({ message: "Oops! Something went wrong. Please try after sometime."});
         return;
     }
 }

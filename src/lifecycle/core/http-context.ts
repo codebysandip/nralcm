@@ -13,7 +13,6 @@ export class HttpContext {
     public user: AuthPrinciple;
     public routeDescriptor: RouteDescriptor;
     public httpResponseMessage: HttpResponseMessage<any>;
-    public isObservableResponse: boolean = false;
 
     constructor(req: Request, res: Response) {
         this.request = req;

@@ -29,7 +29,8 @@ export function Route(httpMethod: HttpMethod, route?: string) {
 
             if (methodParametersType && methodParametersType.length) {
                 methodParametersType.forEach(type => {
-                    if (!(type.name === "Number" || type.name === "String" || type.name === "Boolean")) {
+                    if (!(type.name === "Number" || type.name === "String" || type.name === "Boolean" || 
+                        !(type.constructor && type.constructor.name === "Date"))) {
                         throw new Error(`Get request method ${propertyKey} cannot have ${type.name} as parameter`);
                     }
                 });

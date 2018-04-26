@@ -11,15 +11,21 @@ describe("DefaultHttpResponseHandler", () => {
     let response: Partial<Response> = {
         type: sinon.stub(),
         status: sinon.stub(),
-        send: sinon.stub()
+        json: sinon.stub()
     };
-    let httpContext = new HttpContext(<Request>request, <Response>response);
+
+    let httpResponseMessage: Partial<HttpResponseMessage<any>> = {
+        statusCode: StatusCode.Ok,
+        headers: new Map<string, string>()
+    }
+
+    let httpContext: Partial<HttpContext> = {
+        request: <Request>request,
+        response: <Response>response,
+        httpResponseMessage: <HttpResponseMessage<any>>httpResponseMessage
+    };
 
     describe("sendResponse", () => {
-        let httpResponseMessage: Partial<HttpResponseMessage<any>> = {
-            statusCode: StatusCode.Ok,
-            headers: new Map<string, string>()
-        }
         it("should return OK status code", () => {
             let responseHandler = new DefaultHttpResponseHandler();
             (response.type as sinon.SinonStub).callsFake(() => {
@@ -29,11 +35,11 @@ describe("DefaultHttpResponseHandler", () => {
                 response.statusCode = status;
                 return response;
             });
-            (response.send as sinon.SinonStub).callsFake(() => {
+            (response.json as sinon.SinonStub).callsFake(() => {
                 return response;
             });
 
-            let res = responseHandler.sendResponse(httpContext, <HttpResponseMessage<any>>httpResponseMessage);
+            let res = responseHandler.sendResponse(<HttpContext>httpContext);
             expect((res as Response).statusCode).to.equal(StatusCode.Ok);
         });
     });

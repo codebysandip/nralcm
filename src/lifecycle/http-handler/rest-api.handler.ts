@@ -1,5 +1,5 @@
 import { IHttpHandler } from "./IHttpHandler";
-import { HttpContext, DefaultHttpResponseHandler, ExceptionHandler, AuthHandler, ModelValidationHandler } from "..";
+import { HttpContext, DefaultHttpResponseHandler, ExceptionHandler, AuthHandler, ModelValidationHandler, HttpResponseMessage } from "..";
 import "reflect-metadata/Reflect";
 import { RestApiConfiguration } from "../config";
 import { getContext, getHttpResponse } from "../../common/functions";
@@ -11,8 +11,9 @@ import { Constants } from "..";
 import { FilterExecuter } from "../filter";
 import { UnAuthenticateException, BadRequestException } from "../../exceptions";
 import { IRoute } from "../../common";
-
-
+import { Observable } from "rxjs/Observable";
+import * as Rx from "rxjs";
+import { StatusCode } from "../../common/enums";
 
 /**
  * Handler for rest api
@@ -70,7 +71,7 @@ export class RestApiHandler implements IHttpHandler {
             if (this.restApiConfiguration.AuthHandler) {
                 const authResult = this.restApiConfiguration.AuthHandler.handle(context);
                 if (!authResult) {
-                    throw new UnAuthenticateException(context, this.restApiConfiguration);
+                    throw new UnAuthenticateException();
                 }
             }
 
@@ -78,7 +79,8 @@ export class RestApiHandler implements IHttpHandler {
             if (this.restApiConfiguration.ModelValidationHandler) {
                 const modelValidationHandlerResult = this.restApiConfiguration.ModelValidationHandler.validate(context, routeDescriptor);
                 if (modelValidationHandlerResult.length && !context.response.headersSent) {
-                    throw new BadRequestException(context, modelValidationHandlerResult, this.restApiConfiguration);
+                    // throw new BadRequestException(context, modelValidationHandlerResult, this.restApiConfiguration);
+                    throw new BadRequestException(modelValidationHandlerResult.map(val => val.errorMessage));
                 }
             }
 
@@ -94,20 +96,39 @@ export class RestApiHandler implements IHttpHandler {
             const args = Reflect.getMetadata(Constants.metadata.args, context.controllerObject) as any[];
             const method = routeDescriptor.descriptor.value;
             const data = method.apply(context.controllerObject as Object, args);
-            if (!context.response.headersSent) {
+            if (!context.response.headersSent && !(data instanceof Observable)) {
                 filterExecuter.executeAfterActionExceduted();
                 if (!context.response.headersSent) {
                     if (!context.httpResponseMessage) {
                         context.controllerObject.response.send(data);
                     }
-                    this.restApiConfiguration.HttpResponseHandler.sendResponse(context, context.httpResponseMessage);
+                    this.restApiConfiguration.HttpResponseHandler.sendResponse(context);
+                }
+            } else if (data instanceof Observable) {
+                let sub$ = (data as Rx.Observable<any>).subscribe(data => {
+                    if (!context.httpResponseMessage) {
+                        context.httpResponseMessage = new HttpResponseMessage();
+                        context.httpResponseMessage.body = data;
+                        context.httpResponseMessage.statusCode = StatusCode.Ok;
+                    }
+                    this.restApiConfiguration.HttpResponseHandler.sendResponse(context);
+                    sub$.unsubscribe();
+                }, error => {
+                    this.restApiConfiguration.ExceptionHandler.handleException(context, error);
+                    sub$.unsubscribe();
+                });
+            }
+            return;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+        } catch (e) {
+            if (e && e.constructor && e.constructor.name === "Error") {
+                if (this.restApiConfiguration.ExceptionHandler && !context.response.headersSent) {
+                    this.restApiConfiguration.ExceptionHandler.handleException(context, e);
+                }
+            } else {
+                if (e && e.httpResponseMessage && !context.response.headersSent) {
+                    this.restApiConfiguration.HttpResponseHandler.sendResponse(context);
                 }
             }
-            return;
-        } catch (e) {
-            if (this.restApiConfiguration.ExceptionHandler && !context.response.headersSent) {
-                this.restApiConfiguration.ExceptionHandler.handleException(context, e);
-            }
-        }
+        }                                                                                                   
     }
 }

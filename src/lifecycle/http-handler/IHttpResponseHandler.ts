@@ -1,5 +1,5 @@
 import { Response } from "express-serve-static-core";
-import { HttpContext, HttpResponseMessage } from "..";
+import { HttpContext } from "..";
 
 /**
  * Interface to Response handler.
@@ -12,5 +12,5 @@ export interface IHttpResponseHandler {
      * @param context HttpContext Object
      * @param httpResponseMessage HttpResponseMessage Object
      */
-    sendResponse<T>(context: HttpContext, httpResponseMessage: HttpResponseMessage<T>): Response|void;
+    sendResponse(context: HttpContext): Response|void;
 }

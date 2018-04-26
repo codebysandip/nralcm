@@ -3,14 +3,12 @@ import { HttpContext, Constants, RestApiConfiguration } from "..";
 import { RouteDescriptor, ParamData, QueryString } from "../../common";
 import { NotFoundException } from "../../exceptions";
 
-let restApiConfig: RestApiConfiguration;
 /**
  * Maps current request with api method of controller
  * @param context HttpContext object
  * @returns RouteDescriptor object, If not found throws NotFoundException
  */
 export function ApiMethodMapper(context: HttpContext, restApiConfiguration: RestApiConfiguration): RouteDescriptor {
-    restApiConfig = restApiConfiguration;
     const urlParts = getUrlParts(context.request.url);
     const url = urlParts.slice(1).join("/");
     // try to find route without param
@@ -31,7 +29,7 @@ export function ApiMethodMapper(context: HttpContext, restApiConfiguration: Rest
         mapQueryString(context, paramMapResult);
         return paramMapResult;
     }
-    throw new NotFoundException(context, restApiConfiguration);
+    throw new NotFoundException();
 }
 
 /**
@@ -103,7 +101,7 @@ function mapParams(context: HttpContext, routeDescriptors: RouteDescriptor[], ur
         }
     }
     // tslint:disable-next-line:no-null-keyword
-    throw new NotFoundException(context, restApiConfig);
+    throw new NotFoundException();
 }
 
 /**

@@ -9,12 +9,12 @@
         "noImplicitReturns": true,
         "noImplicitAny": true,
         "rootDir": "src",
-        "watch": true,
+        // "watch": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "noEmitOnError": true,
         "noUnusedLocals": true,
-        "noUnusedParameters": true,
+        "noUnusedParameters": false,
         "declaration": true
     },
     "include": [

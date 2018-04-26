@@ -24,7 +24,7 @@ export class AuthenticationFilter implements IAuthenticate {
                     const tokenData: TokenData = jwt.verify(tokenparts[1], AppConfig.secret) as TokenData;
                     context.user = new JwtAuthPrinciple(tokenData.Email, tokenData.Role);
                 } catch {
-                    throw new TokenNotValidException(context);
+                    throw new TokenNotValidException();
                 }
                 return true;
             }
