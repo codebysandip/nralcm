@@ -1,6 +1,6 @@
 {
   "name": "nralcm",
-  "version": "1.0.0-alpha-2.9",
+  "version": "1.0.0-alpha-2.9.2",
   "description": "This is a framework based on NodeJs to manage rest api request lifecycle",
   "keywords": [
     "node-typescript",

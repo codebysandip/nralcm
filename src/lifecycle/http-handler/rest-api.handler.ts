@@ -126,6 +126,7 @@ export class RestApiHandler implements IHttpHandler {
                 }
             } else {
                 if (e && e.httpResponseMessage && !context.response.headersSent) {
+                    context.httpResponseMessage = e.httpResponseMessage;
                     this.restApiConfiguration.HttpResponseHandler.sendResponse(context);
                 }
             }
