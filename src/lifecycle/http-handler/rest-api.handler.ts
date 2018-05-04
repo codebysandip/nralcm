@@ -114,7 +114,17 @@ export class RestApiHandler implements IHttpHandler {
                     this.restApiConfiguration.HttpResponseHandler.sendResponse(context);
                     sub$.unsubscribe();
                 }, error => {
-                    this.restApiConfiguration.ExceptionHandler.handleException(context, error);
+                    if (error && error.constructor && error.constructor.name === "Error") {
+                        if (this.restApiConfiguration.ExceptionHandler && !context.response.headersSent) {
+                            this.restApiConfiguration.ExceptionHandler.handleException(context, error);
+                        }
+                    } else {
+                        if (error && error.httpResponseMessage && !context.response.headersSent) {
+                            context.httpResponseMessage = error.httpResponseMessage;
+                            this.restApiConfiguration.HttpResponseHandler.sendResponse(context);
+                        }
+                    }     
+                    // this.restApiConfiguration.ExceptionHandler.handleException(context, error);
                     sub$.unsubscribe();
                 });
             }
